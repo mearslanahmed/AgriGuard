@@ -5,8 +5,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import * as SecureStore from 'expo-secure-store';
-
-const BACKEND_URL = 'http://192.168.1.11:3000';
+import { BACKEND_URL } from '../config';
 
 export default function HomeScreen({ navigation }) {
   const { userInfo } = useAuth();

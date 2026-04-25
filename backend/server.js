@@ -15,6 +15,7 @@ app.use(express.json()); // parse JSON request bodies
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/pesticide', require('./routes/pesticideRoutes'));
+app.use('/api/scans', require('./routes/scanRoutes'));
 
 // Health check — useful to confirm server is running
 app.get('/health', (req, res) => {
