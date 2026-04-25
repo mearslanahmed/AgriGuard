@@ -5,7 +5,7 @@ import axios from 'axios';
 // During development: use your PC's local IP (not localhost — phone can't reach it)
 // Example: 'http://192.168.1.5:5000'
 // Change this to my actual Node.js backend URL when that's ready
-const BASE_URL = 'http://YOUR_LOCAL_IP:3000';
+const BASE_URL = 'http://192.168.1.24:3000';
 
 const api = axios.create({
   baseURL: BASE_URL,
