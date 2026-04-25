@@ -51,8 +51,7 @@ export default function DetectScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const [mlResult, pesticideData] = await detectDisease(image);
-      // Pass result + image to result screen
+      const { mlResult, pesticideData } = await detectDisease(image);
       navigation.navigate('Result', { mlResult, pesticideData, imageUri: image });
     } catch (err) {
       Alert.alert('Detection Failed', err.message);
