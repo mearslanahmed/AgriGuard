@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
-const FLASK_URL = "http://192.168.1.24:5000";
-const BACKEND_URL = "http://192.168.1.24:3000";
+const FLASK_URL = 'http://192.168.1.11:5000';
+const BACKEND_URL = 'http://192.168.1.11:3000';
 
 export const detectDisease = async (imageUri) => {
   // Step 1: Send image to Flask ML API for disease prediction
