@@ -4,76 +4,120 @@ import {
   ScrollView, TouchableOpacity
 } from 'react-native';
 
-// Cleaning class names:  "Tomato___Early_blight" to "Tomato Early Blight"
-const formatClassName = (name) => {
-  return name.replace(/_{2,}/g, ' ').replace(/_/g, ' ')
-    .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-};
-
 const getConfidenceColor = (confidence) => {
-    if (confidence >= 0.85) return '#2e7d32'; // green — high confidence
-    if (confidence >= 0.60) return '#f57c00'; // orange — medium
-    return '#e53935';                          // red — low
+  if (confidence >= 85) return '#2e7d32';
+  if (confidence >= 60) return '#f57c00';
+  return '#e53935';
 };
 
 export default function ResultScreen({ navigation, route }) {
-    const { result, imageUri } = route.params;
-    const { class_name, confidence, disease, crop, is_healthy } = result;
-    const formattedName = formatClassName(class_name);
-    const confidencePercent = (confidence).toFixed(1);
-    const isHealthy = is_healthy;
+  const { mlResult, pesticideData, imageUri } = route.params;
+  const { confidence, disease, crop, is_healthy } = mlResult;
 
+  // Pesticide info — only present if disease detected and data found in DB
+  const p = pesticideData?.pesticide;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-        {/* Back button */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backText}>← Back</Text>
+      </TouchableOpacity>
 
-        <Text style={styles.title}>Detection Result</Text>
+      <Text style={styles.title}>Detection Result</Text>
 
-        {/* Image */}
-        {imageUri && (
-            <Image source = {{uri: imageUri}} style={styles.image} />
-        )}
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
-        {/* Result card */}
-        <View style={styles.card}>
-            <Text style={styles.label}>Disease Detected</Text>
-            <Text style={styles.disease}>{crop} — {disease}</Text>
+      {/* Main result card */}
+      <View style={styles.card}>
+        <Text style={styles.label}>Crop</Text>
+        <Text style={styles.disease}>{crop}</Text>
 
-            <Text style={styles.label}>Confidence</Text>
-            <Text style={[styles.confidence, {color: getConfidenceColor(confidence)}]}>
-                {confidencePercent}%
-            </Text>
+        <Text style={styles.label}>Detected Condition</Text>
+        <Text style={styles.disease}>{disease}</Text>
 
-            {/* status badge */}
-             <View style={[styles.badge, { backgroundColor: isHealthy ? '#e8f5e9' : '#fdecea' }]}>
-          <Text style={[styles.badgeText, { color: isHealthy ? '#2e7d32' : '#e53935' }]}>
-            {isHealthy ? 'Plant is Healthy' : 'Disease Detected'}
+        <Text style={styles.label}>Confidence</Text>
+        <Text style={[styles.confidence, { color: getConfidenceColor(confidence) }]}>
+          {confidence.toFixed(1)}%
+        </Text>
+
+        <View style={[styles.badge, { backgroundColor: is_healthy ? '#e8f5e9' : '#fdecea' }]}>
+          <Text style={[styles.badgeText, { color: is_healthy ? '#2e7d32' : '#e53935' }]}>
+            {is_healthy ? 'Plant is Healthy' : 'Disease Detected'}
           </Text>
         </View>
       </View>
 
-      {/* TODO: Placeholder for pesticide info - after backend setup*/}
-      {!isHealthy && (
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Pesticide Advisory</Text>
-          <Text style={styles.infoText}>
-            Pesticide recommendations will be shown here once connected to the backend database.
+      {/* Pesticide advisory — only shown when disease detected */}
+      {!is_healthy && p && (
+        <View style={styles.pesticideCard}>
+          <Text style={styles.pesticideTitle}>Pesticide Advisory</Text>
+
+          <View style={styles.row}>
+            <Text style={styles.fieldLabel}>Recommended Pesticide</Text>
+            <Text style={styles.fieldValue}>{p.name}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.row}>
+            <Text style={styles.fieldLabel}>Dosage</Text>
+            <Text style={styles.fieldValue}>{p.dosage}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.row}>
+            <Text style={styles.fieldLabel}>Spray Interval</Text>
+            <Text style={styles.fieldValue}>{p.spray_interval}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.row}>
+            <Text style={styles.fieldLabel}>Water Ratio</Text>
+            <Text style={styles.fieldValue}>{p.water_ratio}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Safety warning — highlighted separately */}
+          <View style={styles.safetyBox}>
+            <Text style={styles.safetyLabel}>Safety Instructions</Text>
+            <Text style={styles.safetyText}>{p.safety}</Text>
+          </View>
+
+          {p.notes && (
+            <View style={styles.notesBox}>
+              <Text style={styles.notesLabel}>Farmer Notes</Text>
+              <Text style={styles.notesText}>{p.notes}</Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* Healthy message */}
+      {is_healthy && (
+        <View style={styles.healthyCard}>
+          <Text style={styles.healthyText}>
+            Your plant looks healthy! No pesticide treatment needed.
+            Keep monitoring regularly.
           </Text>
         </View>
       )}
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Detect')}
-        >
+      {/* No pesticide data fallback */}
+      {!is_healthy && !p && (
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Advisory Unavailable</Text>
+          <Text style={styles.infoText}>
+            No pesticide data found for this disease. Please consult a local agricultural expert.
+          </Text>
+        </View>
+      )}
+
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Detect')}>
         <Text style={styles.buttonText}>Scan Another</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -90,10 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
   },
-  backText: {
-    color: '#2e7d32',
-    fontSize: 15,
-  },
+  backText: { color: '#2e7d32', fontSize: 15 },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -124,7 +165,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   disease: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
@@ -141,10 +182,61 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
   },
-  badgeText: {
-    fontWeight: '600',
-    fontSize: 14,
+  badgeText: { fontWeight: '600', fontSize: 14 },
+  pesticideCard: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 20,
+    width: '100%',
+    marginBottom: 16,
+    elevation: 2,
   },
+  pesticideTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#e65100',
+    marginBottom: 12,
+  },
+  row: { marginBottom: 8 },
+  fieldLabel: { fontSize: 12, color: '#888', marginBottom: 2 },
+  fieldValue: { fontSize: 15, color: '#333', fontWeight: '500' },
+  divider: { height: 1, backgroundColor: '#f0f0f0', marginVertical: 8 },
+  safetyBox: {
+    backgroundColor: '#fdecea',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 8,
+  },
+  safetyLabel: {
+    fontWeight: 'bold',
+    color: '#e53935',
+    marginBottom: 4,
+    fontSize: 13,
+  },
+  safetyText: { color: '#555', fontSize: 13, lineHeight: 20 },
+  notesBox: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 8,
+  },
+  notesLabel: {
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 4,
+    fontSize: 13,
+  },
+  notesText: { color: '#555', fontSize: 13, lineHeight: 20 },
+  healthyCard: {
+    backgroundColor: '#e8f5e9',
+    borderRadius: 14,
+    padding: 16,
+    width: '100%',
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2e7d32',
+  },
+  healthyText: { color: '#2e7d32', fontSize: 14, lineHeight: 22 },
   infoCard: {
     backgroundColor: '#fff3e0',
     borderRadius: 14,
@@ -154,17 +246,8 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: '#f57c00',
   },
-  infoTitle: {
-    fontWeight: 'bold',
-    color: '#e65100',
-    marginBottom: 6,
-    fontSize: 15,
-  },
-  infoText: {
-    color: '#555',
-    fontSize: 13,
-    lineHeight: 20,
-  },
+  infoTitle: { fontWeight: 'bold', color: '#e65100', marginBottom: 6, fontSize: 15 },
+  infoText: { color: '#555', fontSize: 13, lineHeight: 20 },
   button: {
     backgroundColor: '#2e7d32',
     paddingVertical: 14,
@@ -173,9 +256,5 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 8,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
