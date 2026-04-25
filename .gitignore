@@ -222,3 +222,5 @@ node_modules/
 
 # React Native
 .expo/
+
+.python-version
