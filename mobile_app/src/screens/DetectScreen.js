@@ -6,7 +6,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { detectDisease } from '../services/detectService';
 
-export default function DetectScreen({ navigation }) {
+export default function DetectScreen({ navigation, onScanComplete }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +44,7 @@ export default function DetectScreen({ navigation }) {
   };
 
   const handleDetect = async () => {
-    if (!image){
+    if (!image) {
       Alert.alert('No image', 'Please select or capture an image first');
       return;
     }
@@ -52,6 +52,7 @@ export default function DetectScreen({ navigation }) {
     setLoading(true);
     try {
       const { mlResult, pesticideData } = await detectDisease(image);
+      if (onScanComplete) onScanComplete(); // increment history badge
       navigation.navigate('Result', { mlResult, pesticideData, imageUri: image });
     } catch (err) {
       Alert.alert('Detection Failed', err.message);

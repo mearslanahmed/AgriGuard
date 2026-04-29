@@ -8,7 +8,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../config';
 
-export default function HistoryScreen() {
+export default function HistoryScreen({ onOpen}) {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -16,6 +16,7 @@ export default function HistoryScreen() {
   // Reload scans every time farmer navigates to this tab
   useFocusEffect(
     useCallback(() => {
+      if (onOpen) onOpen(); // clear badge when farmer visits history
       fetchScans();
     }, [])
   );

@@ -1,12 +1,13 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Animated, Dimensions
+  ActivityIndicator, Animated
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -29,12 +30,13 @@ const TABS = [
   { name: 'Profile', icon: 'person-outline', iconActive: 'person', label: 'Profile' },
 ];
 
-function CustomTabBar({ state, descriptors, navigation }) {
-  // One animated value per tab for the press scale effect
+function CustomTabBar({ state, navigation, unreadScans = 0 }) {
   const scales = useRef(TABS.map(() => new Animated.Value(1))).current;
 
   const onPress = (index, routeName, isFocused) => {
-    // Scale down then back up on tap
+    // Haptic feedback on every tab press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     Animated.sequence([
       Animated.timing(scales[index], {
         toValue: 0.85,
@@ -64,6 +66,8 @@ function CustomTabBar({ state, descriptors, navigation }) {
       <View style={styles.navContainer}>
         {TABS.map((tab, index) => {
           const isFocused = state.index === index;
+          // Show badge on History tab when there are scans
+          const showBadge = tab.name === 'History' && unreadScans > 0;
 
           return (
             <Animated.View
@@ -78,17 +82,32 @@ function CustomTabBar({ state, descriptors, navigation }) {
                 onPress={() => onPress(index, tab.name, isFocused)}
                 activeOpacity={0.7}
               >
-                {/* Active tab gets a pill background */}
                 {isFocused && <View style={styles.activePill} />}
 
-                <Ionicons
-                  name={isFocused ? tab.iconActive : tab.icon}
-                  size={22}
-                  color={isFocused ? '#2e7d32' : '#aaa'}
-                />
+                <View style={styles.iconWrapper}>
+                  <Ionicons
+                    name={isFocused ? tab.iconActive : tab.icon}
+                    size={22}
+                    color={isFocused ? '#2e7d32' : '#aaa'}
+                  />
+                  {/* Badge dot on History */}
+                  {showBadge && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {unreadScans > 9 ? '9+' : unreadScans}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
                 <Text style={[
                   styles.tabLabel,
-                  { color: isFocused ? '#2e7d32' : '#aaa' }
+                  {
+                    color: isFocused ? '#2e7d32' : '#aaa',
+                    // Active label is bold and slightly larger
+                    fontWeight: isFocused ? '700' : '500',
+                    fontSize: isFocused ? 12 : 11,
+                  }
                 ]}>
                   {tab.label}
                 </Text>
@@ -102,14 +121,28 @@ function CustomTabBar({ state, descriptors, navigation }) {
 }
 
 function MainTabs() {
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  // Called by DetectScreen after every successful scan
+  const incrementUnread = () => setUnreadCount((prev) => prev + 1);
+
+  // Called when user opens History tab — clears badge
+  const clearUnread = () => setUnreadCount(0);
+
   return (
     <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={(props) => <CustomTabBar {...props} unreadScans={unreadCount} />}
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Detect" component={DetectScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen
+        name="Detect"
+        children={(props) => <DetectScreen {...props} onScanComplete={incrementUnread} />}
+      />
+      <Tab.Screen
+        name="History"
+        children={() => <HistoryScreen onOpen={clearUnread} />}
+      />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -163,7 +196,6 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-around',
     alignItems: 'center',
-    // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
@@ -192,9 +224,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8f5e9',
     borderRadius: 20,
   },
+  iconWrapper: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -8,
+    backgroundColor: '#e53935',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
   tabLabel: {
-    fontSize: 11,
-    fontWeight: '600',
     marginTop: 3,
   },
 });
