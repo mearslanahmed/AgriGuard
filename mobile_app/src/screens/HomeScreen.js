@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 24,
     paddingBottom: 40,
+    paddingBottom: 100, // clears floating nav
   },
   header: {
     marginBottom: 24,

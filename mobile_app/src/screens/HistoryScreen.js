@@ -121,7 +121,7 @@ export default function HistoryScreen() {
         data={scans}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
-        contentContainerStyle={scans.length === 0 && styles.centered}
+        contentContainerStyle={[{ paddingBottom: 100 }, scans.length === 0 && styles.centered]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

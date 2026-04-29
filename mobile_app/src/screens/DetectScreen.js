@@ -61,7 +61,7 @@ export default function DetectScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 100 }]}>
       <Text style={styles.title}>Detect Disease</Text>
       <Text style={styles.subtitle}>Take or upload a crop leaf image</Text>
 
