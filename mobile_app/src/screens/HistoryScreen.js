@@ -8,7 +8,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import { BACKEND_URL } from '../config';
 
-export default function HistoryScreen({ onOpen}) {
+export default function HistoryScreen({ onOpen, navigation}) {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -18,26 +18,29 @@ export default function HistoryScreen({ onOpen}) {
     useCallback(() => {
       if (onOpen) onOpen(); // clear badge when farmer visits history
       fetchScans();
-    }, [])
+    }, [onOpen])
   );
 
   const fetchScans = async () => {
-    try {
-      const token = await SecureStore.getItemAsync('userToken');
-      const response = await fetch(`${BACKEND_URL}/api/scans`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setScans(data);
-      }
-    } catch (err) {
-      console.log('History fetch error:', err.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  try {
+    const token = await SecureStore.getItemAsync('userToken');
+    console.log('Token:', token);
+    const response = await fetch(`${BACKEND_URL}/api/scans`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    console.log('Response status:', response.status);
+    const data = await response.json();
+    console.log('Scans data:', JSON.stringify(data));
+    if (response.ok) {
+      setScans(data);
     }
-  };
+  } catch (err) {
+    console.log('History fetch error:', err.message);
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+};
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -147,7 +150,9 @@ const styles = StyleSheet.create({
   centered: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
+    padding: 20,
+    paddingTop: 52,
   },
   title: {
     fontSize: 24,
