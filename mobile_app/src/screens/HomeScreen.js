@@ -12,42 +12,39 @@ import { BACKEND_URL } from '../config';
 
 export default function HomeScreen({ navigation }) {
   const { userInfo } = useAuth();
-  const [recentScan, setRecentScan] = useState(null);
+  const [recentScans, setRecentScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Animations
   const heroAnim = useRef(new Animated.Value(0)).current;
   const cardAnim = useRef(new Animated.Value(0)).current;
   const scanAnim = useRef(new Animated.Value(1)).current;
 
   useFocusEffect(
     useCallback(() => {
-      fetchRecentScan();
+      fetchRecentScans();
       runEntryAnimation();
     }, [])
   );
 
   const runEntryAnimation = () => {
-    // Reset first
     heroAnim.setValue(0);
     cardAnim.setValue(0);
 
     Animated.stagger(200, [
       Animated.timing(heroAnim, {
         toValue: 1,
-        duration: 300,
+        duration: 400,
         useNativeDriver: true,
       }),
       Animated.timing(cardAnim, {
         toValue: 1,
-        duration: 350,
+        duration: 500,
         useNativeDriver: true,
       }),
     ]).start();
   };
 
-  // Pulse animation on scan button press
   const pulseScanButton = () => {
     Animated.sequence([
       Animated.timing(scanAnim, {
@@ -65,15 +62,15 @@ export default function HomeScreen({ navigation }) {
     navigation.navigate('Detect');
   };
 
-  const fetchRecentScan = async () => {
+  const fetchRecentScans = async () => {
     try {
       const token = await SecureStore.getItemAsync('userToken');
-      const response = await fetch(`${BACKEND_URL}/api/scans?limit=1`, {
+      const response = await fetch(`${BACKEND_URL}/api/scans?limit=3`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         const data = await response.json();
-        setRecentScan(data[0] || null);
+        setRecentScans(data);
       }
     } catch (err) {
       console.log('Home fetch error:', err.message);
@@ -110,13 +107,13 @@ export default function HomeScreen({ navigation }) {
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => { setRefreshing(true); fetchRecentScan(); }}
+          onRefresh={() => { setRefreshing(true); fetchRecentScans(); }}
           colors={['#2e7d32']}
         />
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Hero section — slides in from top */}
+      {/* Hero — slides in from top */}
       <Animated.View style={[
         styles.hero,
         {
@@ -144,7 +141,6 @@ export default function HomeScreen({ navigation }) {
           Your crops are waiting to be checked.
         </Text>
 
-        {/* Scan button with pulse animation */}
         <Animated.View style={{ transform: [{ scale: scanAnim }] }}>
           <TouchableOpacity
             style={styles.scanButton}
@@ -160,7 +156,7 @@ export default function HomeScreen({ navigation }) {
         </Animated.View>
       </Animated.View>
 
-      {/* Cards section — slides in from bottom */}
+      {/* Cards — slide in from bottom */}
       <Animated.View style={{
         opacity: cardAnim,
         transform: [{
@@ -171,47 +167,95 @@ export default function HomeScreen({ navigation }) {
         }]
       }}>
 
-        {/* Last scan card */}
+        {/* Last scan */}
         <Text style={styles.sectionTitle}>Last Scan</Text>
         {loading ? (
           <ActivityIndicator color="#2e7d32" style={{ marginVertical: 20 }} />
-        ) : recentScan ? (
-          <View style={styles.lastScanCard}>
-            <View style={[
-              styles.scanBar,
-              { backgroundColor: recentScan.is_healthy ? '#2e7d32' : '#e53935' }
-            ]} />
-            <View style={styles.scanInfo}>
-              <Text style={styles.scanCrop}>{recentScan.crop}</Text>
-              <Text style={styles.scanDisease}>{recentScan.disease}</Text>
-              <Text style={styles.scanDate}>
-                {new Date(recentScan.createdAt).toLocaleDateString('en-PK', {
-                  day: 'numeric', month: 'short', year: 'numeric'
-                })}
-              </Text>
-            </View>
-            <View style={styles.scanRight}>
-              <View style={[
-                styles.scanBadge,
-                { backgroundColor: recentScan.is_healthy ? '#e8f5e9' : '#fdecea' }
-              ]}>
-                <Text style={[
-                  styles.scanBadgeText,
-                  { color: recentScan.is_healthy ? '#2e7d32' : '#e53935' }
-                ]}>
-                  {recentScan.is_healthy ? 'Healthy' : 'Diseased'}
-                </Text>
-              </View>
-              <Text style={styles.scanConfidence}>
-                {recentScan.confidence.toFixed(1)}%
-              </Text>
-            </View>
-          </View>
-        ) : (
+        ) : recentScans.length === 0 ? (
           <View style={styles.emptyCard}>
             <Ionicons name="leaf-outline" size={28} color="#ccc" />
             <Text style={styles.emptyText}>No scans yet — scan your first crop above</Text>
           </View>
+        ) : (
+          <>
+            {/* Featured most recent scan */}
+            <View style={styles.lastScanCard}>
+              <View style={[
+                styles.scanBar,
+                { backgroundColor: recentScans[0].is_healthy ? '#2e7d32' : '#e53935' }
+              ]} />
+              <View style={styles.scanInfo}>
+                <Text style={styles.scanCrop}>{recentScans[0].crop}</Text>
+                <Text style={styles.scanDisease}>{recentScans[0].disease}</Text>
+                <Text style={styles.scanDate}>
+                  {new Date(recentScans[0].createdAt).toLocaleDateString('en-PK', {
+                    day: 'numeric', month: 'short', year: 'numeric'
+                  })}
+                </Text>
+              </View>
+              <View style={styles.scanRight}>
+                <View style={[
+                  styles.scanBadge,
+                  { backgroundColor: recentScans[0].is_healthy ? '#e8f5e9' : '#fdecea' }
+                ]}>
+                  <Text style={[
+                    styles.scanBadgeText,
+                    { color: recentScans[0].is_healthy ? '#2e7d32' : '#e53935' }
+                  ]}>
+                    {recentScans[0].is_healthy ? 'Healthy' : 'Diseased'}
+                  </Text>
+                </View>
+                <Text style={styles.scanConfidence}>
+                  {recentScans[0].confidence.toFixed(1)}%
+                </Text>
+              </View>
+            </View>
+
+            {/* Earlier scans — compact rows */}
+            {recentScans.length > 1 && (
+              <View style={styles.earlierCard}>
+                <Text style={styles.earlierTitle}>Earlier</Text>
+                {recentScans.slice(1).map((scan, index) => (
+                  <View key={scan._id || index}>
+                    <View style={styles.earlierRow}>
+                      <View style={[
+                        styles.earlierDot,
+                        { backgroundColor: scan.is_healthy ? '#2e7d32' : '#e53935' }
+                      ]} />
+                      <View style={styles.earlierInfo}>
+                        <Text style={styles.earlierCrop}>{scan.crop}</Text>
+                        <Text style={styles.earlierDisease}>{scan.disease}</Text>
+                      </View>
+                      <View style={styles.earlierRight}>
+                        <Text style={[
+                          styles.earlierStatus,
+                          { color: scan.is_healthy ? '#2e7d32' : '#e53935' }
+                        ]}>
+                          {scan.is_healthy ? 'Healthy' : 'Diseased'}
+                        </Text>
+                        <Text style={styles.earlierDate}>
+                          {new Date(scan.createdAt).toLocaleDateString('en-PK', {
+                            day: 'numeric', month: 'short'
+                          })}
+                        </Text>
+                      </View>
+                    </View>
+                    {index < recentScans.slice(1).length - 1 && (
+                      <View style={styles.earlierDivider} />
+                    )}
+                  </View>
+                ))}
+
+                <TouchableOpacity
+                  style={styles.seeAllButton}
+                  onPress={() => navigation.navigate('History')}
+                >
+                  <Text style={styles.seeAllText}>See all scans</Text>
+                  <Ionicons name="arrow-forward" size={14} color="#2e7d32" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </>
         )}
 
         {/* Daily tip */}
@@ -256,8 +300,6 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 110,
   },
-
-  // Hero
   hero: {
     backgroundColor: '#1b5e20',
     paddingTop: 60,
@@ -325,8 +367,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
-
-  // Section title
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
@@ -334,8 +374,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 16,
   },
-
-  // Last scan
   lastScanCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -388,8 +426,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#888',
   },
-
-  // Empty
   emptyCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -405,8 +441,74 @@ const styles = StyleSheet.create({
     color: '#aaa',
     textAlign: 'center',
   },
-
-  // Tip
+  earlierCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    padding: 16,
+    elevation: 1,
+  },
+  earlierTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#aaa',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 12,
+  },
+  earlierRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 6,
+  },
+  earlierDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  earlierInfo: { flex: 1 },
+  earlierCrop: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  earlierDisease: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 1,
+  },
+  earlierRight: { alignItems: 'flex-end' },
+  earlierStatus: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  earlierDate: {
+    fontSize: 11,
+    color: '#aaa',
+    marginTop: 2,
+  },
+  earlierDivider: {
+    height: 1,
+    backgroundColor: '#f2f2f7',
+    marginVertical: 4,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f2f2f7',
+  },
+  seeAllText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2e7d32',
+  },
   tipCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -438,8 +540,6 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 18,
   },
-
-  // Water shortcut
   waterCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
