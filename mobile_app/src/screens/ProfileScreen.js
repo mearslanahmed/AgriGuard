@@ -17,6 +17,13 @@ export default function ProfileScreen({ navigation }) {
   const [notifications, setNotifications] = useState(true);
   const [profilePic, setProfilePic] = useState(null);
 
+// Load saved pic on mount
+React.useEffect(() => {
+  SecureStore.getItemAsync('profilePic').then(uri => {
+    if (uri) setProfilePic(uri);
+  });
+}, []);
+
   // Animations
   const headerAnim = useRef(new Animated.Value(0)).current;
   const statsAnim = useRef(new Animated.Value(0)).current;
@@ -25,7 +32,7 @@ export default function ProfileScreen({ navigation }) {
 
   React.useEffect(() => {
   const unsubscribe = navigation.addListener('focus', () => {
-    // reset all anims
+    // reset all animations
     headerAnim.setValue(0);
     statsAnim.setValue(0);
     sectionsAnim.setValue(0);
@@ -82,7 +89,11 @@ export default function ProfileScreen({ navigation }) {
             return;
           }
           const result = await ImagePicker.launchCameraAsync({ quality: 0.8, allowsEditing: true, aspect: [1, 1] });
-          if (!result.canceled) setProfilePic(result.assets[0].uri);
+          if (!result.canceled){
+            const uri = result.assets[0].uri;
+            setProfilePic(uri);
+            await SecureStore.setItemAsync('profilePic', uri);
+          };
         },
       },
       {
@@ -96,13 +107,20 @@ export default function ProfileScreen({ navigation }) {
           const result = await ImagePicker.launchImageLibraryAsync({
             quality: 0.8, allowsEditing: true, aspect: [1, 1],
           });
-          if (!result.canceled) setProfilePic(result.assets[0].uri);
+          if (!result.canceled) {
+            const uri = result.assets[0].uri;
+            setProfilePic(uri);
+            await SecureStore.setItemAsync('profilePic', uri);
+          };
         },
       },
       profilePic && {
         text: 'Remove Photo',
         style: 'destructive',
-        onPress: () => setProfilePic(null),
+        onPress: () => {
+          setProfilePic(null);
+          SecureStore.deleteItemAsync('profilePic');
+        }
       },
       { text: 'Cancel', style: 'cancel' },
     ].filter(Boolean));
@@ -265,12 +283,6 @@ export default function ProfileScreen({ navigation }) {
             icon="help-circle-outline"
             label="How to Use AgriGuard"
             onPress={() => Alert.alert('Guide', 'Go to Detect tab, take a photo of your crop leaf, and tap Analyze Crop.')}
-          />
-          <View style={styles.menuDivider} />
-          <MenuItem
-            icon="leaf-outline"
-            label="Supported Crops"
-            value="Tomato · Potato · Pepper"
           />
           <View style={styles.menuDivider} />
           <MenuItem
