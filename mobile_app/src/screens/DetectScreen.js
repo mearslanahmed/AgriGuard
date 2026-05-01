@@ -11,7 +11,7 @@ import { detectDisease } from '../services/detectService';
 const { width } = Dimensions.get('window');
 const IMAGE_BOX_HEIGHT = width * 0.85;
 
-export default function DetectScreen({ navigation, onScanComplete }) {
+export default function DetectScreen({ navigation, route, onScanComplete }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -67,6 +67,14 @@ export default function DetectScreen({ navigation, onScanComplete }) {
       scanLoop.current?.stop();
     };
   }, []);
+
+  // using a focus listener so it clears every time user lands back on Detect
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setImage(null);
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     if (image) {
