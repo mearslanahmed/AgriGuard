@@ -229,7 +229,7 @@ React.useEffect(() => {
         {/* Edit profile */}
         <TouchableOpacity
           style={styles.editBtn}
-          onPress={() => navigation.navigate('EditProfile')}
+          onPress={() => navigation.navigate('EditProfileScreen')}
           activeOpacity={0.75}
         >
           <Ionicons name="pencil-outline" size={14} color="#2e7d32" style={{ marginRight: 6 }} />

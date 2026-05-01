@@ -17,6 +17,7 @@ import HomeScreen from '../screens/HomeScreen';
 import DetectScreen from '../screens/DetectScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
 import ResultScreen from '../screens/ResultScreen';
 import WaterControlScreen from '../screens/WaterControlScreen';
 
@@ -165,6 +166,7 @@ export default function AppNavigator() {
         {userToken ? (
           <>
             <Stack.Screen name="MainTabs" component={MainTabs} />
+            <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
             <Stack.Screen name="Result" component={ResultScreen} />
             <Stack.Screen name="WaterControl" component={WaterControlScreen} />
           </>
