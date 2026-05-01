@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ScrollView, ActivityIndicator, RefreshControl,
-  Animated
+  Animated, ImageBackground
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,7 +30,6 @@ export default function HomeScreen({ navigation }) {
   const runEntryAnimation = () => {
     heroAnim.setValue(0);
     cardAnim.setValue(0);
-
     Animated.stagger(200, [
       Animated.timing(heroAnim, {
         toValue: 1,
@@ -113,47 +112,53 @@ export default function HomeScreen({ navigation }) {
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Hero — slides in from top */}
-      <Animated.View style={[
-        styles.hero,
-        {
-          opacity: heroAnim,
-          transform: [{
-            translateY: heroAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [-30, 0],
-            })
-          }]
-        }
-      ]}>
-        <View style={styles.heroTop}>
-          <View>
-            <Text style={styles.greeting}>{getGreeting()},</Text>
-            <Text style={styles.name}>{firstName}</Text>
-          </View>
-          <View style={styles.heroBadge}>
-            <Ionicons name="leaf" size={14} color="#4caf50" />
-            <Text style={styles.heroBadgeText}>AgriGuard</Text>
-          </View>
-        </View>
-
-        <Text style={styles.heroSubtitle}>
-          Your crops are waiting to be checked.
-        </Text>
-
-        <Animated.View style={{ transform: [{ scale: scanAnim }] }}>
-          <TouchableOpacity
-            style={styles.scanButton}
-            onPress={pulseScanButton}
-            activeOpacity={1}
-          >
-            <View style={styles.scanButtonIcon}>
-              <Ionicons name="scan" size={22} color="#fff" />
+      {/* Hero with field background — slides in from top */}
+      <Animated.View style={{
+        opacity: heroAnim,
+        transform: [{
+          translateY: heroAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-30, 0],
+          })
+        }]
+      }}>
+        <ImageBackground
+          source={require('../../assets/field.jpg')}
+          style={styles.hero}
+          imageStyle={styles.heroImage}
+        >
+          {/* Dark overlay keeps text readable over any photo */}
+          <View style={styles.heroOverlay}>
+            <View style={styles.heroTop}>
+              <View>
+                <Text style={styles.greeting}>{getGreeting()},</Text>
+                <Text style={styles.name}>{firstName}</Text>
+              </View>
+              <View style={styles.heroBadge}>
+                <Ionicons name="leaf" size={14} color="#4caf50" />
+                <Text style={styles.heroBadgeText}>AgriGuard</Text>
+              </View>
             </View>
-            <Text style={styles.scanButtonText}>Scan a Crop</Text>
-            <Ionicons name="arrow-forward-circle" size={22} color="rgba(255,255,255,0.7)" />
-          </TouchableOpacity>
-        </Animated.View>
+
+            <Text style={styles.heroSubtitle}>
+              Your crops are waiting to be checked.
+            </Text>
+
+            <Animated.View style={{ transform: [{ scale: scanAnim }] }}>
+              <TouchableOpacity
+                style={styles.scanButton}
+                onPress={pulseScanButton}
+                activeOpacity={1}
+              >
+                <View style={styles.scanButtonIcon}>
+                  <Ionicons name="scan" size={22} color="#fff" />
+                </View>
+                <Text style={styles.scanButtonText}>Scan a Crop</Text>
+                <Ionicons name="arrow-forward-circle" size={22} color="rgba(255,255,255,0.7)" />
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </ImageBackground>
       </Animated.View>
 
       {/* Cards — slide in from bottom */}
@@ -166,9 +171,8 @@ export default function HomeScreen({ navigation }) {
           })
         }]
       }}>
-
-        {/* Last scan */}
         <Text style={styles.sectionTitle}>Last Scan</Text>
+
         {loading ? (
           <ActivityIndicator color="#2e7d32" style={{ marginVertical: 20 }} />
         ) : recentScans.length === 0 ? (
@@ -300,12 +304,19 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 110,
   },
+
+  // Hero
   hero: {
-    backgroundColor: '#1b5e20',
+    marginBottom: 24,
+  },
+  heroImage: {
+    opacity: 0.55,
+  },
+  heroOverlay: {
+    backgroundColor: 'rgba(18, 60, 18, 0.82)',
     paddingTop: 60,
     paddingBottom: 32,
     paddingHorizontal: 24,
-    marginBottom: 24,
   },
   heroTop: {
     flexDirection: 'row',
@@ -342,6 +353,8 @@ const styles = StyleSheet.create({
     color: '#81c784',
     marginBottom: 20,
   },
+
+  // Scan button
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -367,6 +380,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
   },
+
+  // Section title
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
@@ -374,6 +389,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 16,
   },
+
+  // Last scan card
   lastScanCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -426,6 +443,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#888',
   },
+
+  // Empty state
   emptyCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -441,6 +460,8 @@ const styles = StyleSheet.create({
     color: '#aaa',
     textAlign: 'center',
   },
+
+  // Earlier scans
   earlierCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -509,6 +530,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2e7d32',
   },
+
+  // Daily tip
   tipCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -540,6 +563,8 @@ const styles = StyleSheet.create({
     color: '#555',
     lineHeight: 18,
   },
+
+  // Water shortcut
   waterCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
