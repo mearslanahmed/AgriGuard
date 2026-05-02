@@ -11,13 +11,21 @@ export const detectDisease = async (imageUri) => {
   });
 
   const mlResponse = await fetch(`${FLASK_URL}/predict`, {
-    method: 'POST',
-    body: formData,
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  method: 'POST',
+  body: formData,
+  headers: { 'Content-Type': 'multipart/form-data' },
+});
 
-  if (!mlResponse.ok) throw new Error('ML prediction failed. Try again.');
-  const mlResult = await mlResponse.json();
+const mlResult = await mlResponse.json();
+
+// 422 = not a plant image
+if (mlResponse.status === 422) {
+  throw new Error(mlResult.error);
+}
+
+if (!mlResponse.ok) {
+  throw new Error('ML prediction failed. Try again.');
+}
 
   const token = await SecureStore.getItemAsync('userToken');
 
