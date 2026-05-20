@@ -1,14 +1,15 @@
 const Pesticide = require('../models/Pesticide');
 
 // GET /api/pesticides/:class_name
+// Called by mobile app after detection to get advisory for detected disease
 const getPesticideByClass = async (req, res) => {
   try {
     const rawParam = decodeURIComponent(req.params.class_name).trim();
 
-    // Escape special regex characters like ( ) so they are treated as literal text
+    // Escape regex structural characters like ( ) so they evaluate as literal text primitives
     const escapedParam = rawParam.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
-    // Anchored case-insensitive match on the escaped string literal
+    // Anchored case-insensitive regular expression match to eliminate string discrepancies
     const record = await Pesticide.findOne({
       disease_label: { $regex: new RegExp(`^${escapedParam}$`, 'i') }
     });
