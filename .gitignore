@@ -224,3 +224,12 @@ node_modules/
 .expo/
 
 .python-version
+
+.vscode/
+
+# Ignore heavy custom deep learning model weights
+flask_api/model/*.keras
+flask_api/model/*.h5
+
+ml_model/*.keras
+ml_model/*.h5

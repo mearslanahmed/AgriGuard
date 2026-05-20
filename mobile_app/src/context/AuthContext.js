@@ -42,9 +42,13 @@ export function AuthProvider({ children }) {
     setUserToken(null);
     setUserInfo(null);
   };
+  const updateUserInfo = async (updated) => {
+  await SecureStore.setItemAsync('userInfo', JSON.stringify(updated));
+  setUserInfo(updated);
+  };
 
   return (
-    <AuthContext.Provider value={{ userToken, userInfo, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ userToken, userInfo, isLoading, login, logout, updateUserInfo }}>
       {children}
     </AuthContext.Provider>
   );
