@@ -16,9 +16,9 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 BASE = os.path.dirname(__file__)
 MODEL_DIR = os.path.join(BASE, 'model')
 
-# -------------------------------------------------------------------------
-# LOAD CORE APPLICATION ARTIFACTS
-# -------------------------------------------------------------------------
+
+# LOAD CORE APPLICATION ARTIFACTS WITH VERIFIED FILENAMES
+
 print("Loading crop classifier (Model 1)...")
 model1 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras'))
 
@@ -39,39 +39,12 @@ for idx_str, label in idx_to_disease.items():
         crop_disease_map.setdefault(crop, []).append((int(idx_str), label))
 
 
-def validate_leaf_chroma(img):
-    """
-    Blocks non-biological items (laptops, seaports, gray backgrounds)
-    while preserving dark/glossy tropical leaf profiles like Mango.
-    """
-    small_img = img.resize((32, 32))
-    r, g, b = small_img.split()
-
-    avg_r = np.mean(r)
-    avg_g = np.mean(g)
-    avg_b = np.mean(b)
-
-    # 1. Block pure neutral structures (Electronic displays, text documents, white walls)
-    # Balanced RGB channels mean gray/white/black. Biological frames always show variance.
-    if abs(avg_r - avg_g) < 6 and abs(avg_g - avg_b) < 6:
-        return False, "This photo does not appear to contain a valid biological leaf canvas."
-
-    # 2. Safety Valve: Drop completely blue or red solid artifact blocks
-    if avg_b > (avg_g + 40) or avg_r > (avg_g + 50):
-        return False, "The color profile does not match an agricultural green crop leaf."
-
-    return True, "Valid"
-
-
 def preprocess(image_bytes):
+    """
+    Standardizes incoming byte arrays for EfficientNetB3 inference.
+    Aggressive chroma filtering removed to protect chlorotic/dried crop signatures.
+    """
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-
-    # Run our updated non-crop firewall filter
-    is_leaf, error_message = validate_leaf_chroma(img)
-    if not is_leaf:
-        raise ValueError(error_message)
-
-    # Standardize image size for EfficientNetB3 inference
     img_resized = img.resize((300, 300))
     arr = np.array(img_resized) / 255.0
     return np.expand_dims(arr, axis=0)
@@ -89,20 +62,13 @@ def predict():
     try:
         image_bytes = file.read()
         tensor = preprocess(image_bytes)
-    except ValueError as val_err:
-        return jsonify({
-            'success': False,
-            'error': str(val_err),
-            'crop': 'Unknown',
-            'crop_confidence': 0.0
-        }), 422
     except Exception as e:
         return jsonify({'error': f'Invalid image file: {str(e)}'}), 400
 
     try:
-        # ---------------------------------------------------------
+        
         # STAGE 1: CROP SELECTION
-        # ---------------------------------------------------------
+        
         crop_probs = model1.predict(tensor, verbose=0)[0]
         crop_idx = int(np.argmax(crop_probs))
         crop_conf = float(crop_probs[crop_idx])
@@ -113,8 +79,9 @@ def predict():
         runner_up_idx = int(sorted_crop_indices[1])
         runner_up_name = idx_to_crop[str(runner_up_idx)]
 
-        # Defensive Gate: If the network is guessing wildly across all 11 classes, reject it
-        if crop_conf < 0.60 or crop_name == 'Unknown':
+        # Optimized Threshold: Adjusted to 0.45 to support field conditions.
+        # Native 'Unknown' class handles non-plant noise filters.
+        if crop_conf < 0.45 or crop_name == 'Unknown':
             return jsonify({
                 'success': False,
                 'error': 'The plant leaf is not supported by AgriGuard, or the image is too blurry. Please try again.',
@@ -122,9 +89,9 @@ def predict():
                 'crop_confidence': round(crop_conf, 4)
             }), 422
 
-        # ---------------------------------------------------------
+        
         # STAGE 2: DISEASE EVALUATION
-        # ---------------------------------------------------------
+        
         disease_probs = model2.predict(tensor, verbose=0)[0]
 
         # Pull candidate diseases for the primary crop guess
@@ -138,8 +105,8 @@ def predict():
             best_primary_label = idx_to_disease[str(best_primary_idx)]
             primary_disease_conf = float(disease_probs[best_primary_idx])
 
-        # Dynamic Fallback: If the primary crop diagnosis yields a terrible disease match (< 30%),
-        # but the runner-up crop guess has candidate diseases, check the runner-up crop's profile instead.
+        # Dynamic Fallback: If primary crop yields a poor disease match (< 30%),
+        # but the runner-up crop guess has candidate diseases, check the runner-up instead.
         if primary_disease_conf < 0.30 and crop_probs[runner_up_idx] > 0.20:
             runner_candidates = crop_disease_map.get(runner_up_name, [])
             if runner_candidates:
@@ -154,8 +121,8 @@ def predict():
                     best_primary_label = best_runner_label
                     primary_disease_conf = runner_disease_conf
 
-        # Final Disease Gate: If even after checking fallbacks the confidence is too low, reject it
-        if primary_disease_conf < 0.50:
+        # Optimized Disease Gate: Lowered to 0.35 to catch early/subtle infections
+        if primary_disease_conf < 0.35:
             return jsonify({
                 'success': False,
                 'error': 'The model recognizes the crop structure but cannot reliably diagnose any disease anomalies. Ensure proper lighting.',
@@ -172,7 +139,7 @@ def predict():
             'crop': crop_name.strip(),
             'crop_confidence': round(crop_conf, 4),
             'disease': disease_name.strip(),
-            'disease_label': best_primary_label.strip(), # Must match MongoDB values exactly
+            'disease_label': best_primary_label.strip(), # Matches MongoDB values exactly
             'disease_confidence': round(primary_disease_conf, 4),
             'confidence': round(primary_disease_conf * 100, 2),
             'is_healthy': is_healthy
@@ -180,5 +147,7 @@ def predict():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=5000)
