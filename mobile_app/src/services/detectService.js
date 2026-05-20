@@ -1,11 +1,18 @@
 import * as SecureStore from 'expo-secure-store';
 import { FLASK_URL, BACKEND_URL } from '../config';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 export const detectDisease = async (imageUri) => {
+  // Compressing and resizing the image BEFORE sending
+  const compressesImage = await ImageManipulator.manipulateAsync(
+    imageUri,
+    [{ resize: { width: 800 } }], // Resize to width of 800px, maintaining aspect ratio
+    { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+  );
   // Step 1: Send image to Flask ML API
   const formData = new FormData();
   formData.append('image', {
-    uri: imageUri,
+    uri: compressesImage.uri,   // Use the compressed image URI
     type: 'image/jpeg',
     name: 'crop.jpg',
   });
