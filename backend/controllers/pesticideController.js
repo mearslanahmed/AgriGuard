@@ -1,39 +1,40 @@
 const Pesticide = require('../models/Pesticide');
 
 // GET /api/pesticides/:class_name
-// Called by mobile app after detection to get advisory for detected disease
-
 const getPesticideByClass = async (req, res) => {
-    try {
-        // class_name comes URL-encoded from mobile app, decode it first
-        const class_name = decodeURIComponent(req.params.class_name);
+  try {
+    const rawParam = decodeURIComponent(req.params.class_name).trim();
 
-        const record = await Pesticide.findOne({ class_name });
+    // Escape special regex characters like ( ) so they are treated as literal text
+    const escapedParam = rawParam.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
-        if (!record) {
-            return res.status(404).json({
-                message: `No pesticide info found for class: ${class_name},`
-            });
-        }
+    // Anchored case-insensitive match on the escaped string literal
+    const record = await Pesticide.findOne({
+      disease_label: { $regex: new RegExp(`^${escapedParam}$`, 'i') }
+    });
 
-        res.json(record);
-    } catch (err) {
-        console.error('Pesticide fetch error:', err.message);
-        res.status(500).json({ message: 'Server error fetching pesticide info' });
+    if (!record) {
+      console.log(`[DATABASE 404] No pesticide record matched the key: "${rawParam}"`);
+      return res.status(404).json({
+        message: `No pesticide info found for: ${rawParam}`
+      });
     }
-};
 
-// GET /api/pesticides
-// Admin use - return all records
+    res.json(record);
+  } catch (err) {
+    console.error('Pesticide fetch error:', err.message);
+    res.status(500).json({ message: 'Server error fetching pesticide info' });
+  }
+};
 
 const getAllPesticides = async (req, res) => {
-    try {
-        const records = await Pesticide.find({}).sort({ crop: 1});
-        res.json(records);
-    } catch (err) {
-        console.error('Pesticide list error:', err.message);
-        res.status(500).json({ message: 'Server error fetching pesticide list' });
-    }
+  try {
+    const records = await Pesticide.find({}).sort({ crop: 1 });
+    res.json(records);
+  } catch (err) {
+    console.error('Pesticide list error:', err.message);
+    res.status(500).json({ message: 'Server error fetching pesticide list' });
+  }
 };
 
-module.exports = {getPesticideByClass, getAllPesticides};
+module.exports = { getPesticideByClass, getAllPesticides };

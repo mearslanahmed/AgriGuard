@@ -1,128 +1,184 @@
 import os
 import json
 import numpy as np
-from flask import Flask, request, jsonify
-from tensorflow.keras.models import load_model
-from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.applications.efficientnet import preprocess_input, decode_predictions
-from tensorflow.keras.preprocessing import image
-from PIL import Image
 import io
+from flask import Flask, request, jsonify
+from PIL import Image
+
+# Import core Keras engine layers
+from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
 
-print("Loading disease model...")
-MODEL_PATH = os.path.join("model", "best_model.keras")
-CLASS_INDICES_PATH = os.path.join("model", "class_indices.json")
+# Enforce a strict file-upload limit (5MB max) to protect system memory
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
-model = load_model(MODEL_PATH)
+BASE = os.path.dirname(__file__)
+MODEL_DIR = os.path.join(BASE, 'model')
 
-with open(CLASS_INDICES_PATH, "r") as f:
-    class_indices = json.load(f)
+# -------------------------------------------------------------------------
+# LOAD CORE APPLICATION ARTIFACTS
+# -------------------------------------------------------------------------
+print("Loading crop classifier (Model 1)...")
+model1 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras'))
 
-print(f"Disease model loaded. {len(class_indices)} classes ready.")
+print("Loading disease classifier (Model 2)...")
+model2 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras'))
 
-print("Loading plant gate model (EfficientNetB0)...")
-gate_model = EfficientNetB0(weights="imagenet")
-print("Plant gate ready.")
+with open(os.path.join(MODEL_DIR, 'model1_crop_mapping.json')) as f:
+    idx_to_crop = json.load(f)
 
-# ImageNet class names that are plant/leaf related
-# These are the WordNet IDs for plant-related ImageNet classes
-PLANT_KEYWORDS = [
-    "leaf", "plant", "flower", "tree", "herb", "vegetable",
-    "fungus", "moss", "fern", "shrub", "bud", "petal",
-    "daisy", "mushroom", "cabbage", "broccoli", "cauliflower",
-    "corn", "ear", "spike", "stalk", "vine", "fruit",
-    "tomato", "pepper", "potato", "cucumber", "zucchini",
-    "lettuce", "spinach", "artichoke", "lemon", "orange",
-    "banana", "strawberry", "fig", "pineapple", "pomegranate",
-]
+with open(os.path.join(MODEL_DIR, 'model2_disease_mapping.json')) as f:
+    idx_to_disease = json.load(f)
 
-def is_plant_image(img_pil):
+# Pre-build our global cross-crop disease evaluation indexes
+crop_disease_map = {}
+for idx_str, label in idx_to_disease.items():
+    if '(' in label and label.endswith(')'):
+        crop = label[label.rfind('(') + 1:-1]
+        crop_disease_map.setdefault(crop, []).append((int(idx_str), label))
+
+
+def validate_leaf_chroma(img):
     """
-    Uses EfficientNetB0 pretrained on ImageNet to check
-    if the image contains a plant or leaf.
-    Returns (is_plant: bool, reason: str)
+    Blocks non-biological items (laptops, seaports, gray backgrounds)
+    while preserving dark/glossy tropical leaf profiles like Mango.
     """
-    # EfficientNetB0 expects 224x224
-    img_resized = img_pil.resize((224, 224))
-    img_array = np.array(img_resized)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)  # EfficientNet specific preprocessing
+    small_img = img.resize((32, 32))
+    r, g, b = small_img.split()
 
-    preds = gate_model.predict(img_array, verbose=0)
-    # decode_predictions returns top-5 [(class_id, class_name, confidence), ...]
-    top_preds = decode_predictions(preds, top=5)[0]
+    avg_r = np.mean(r)
+    avg_g = np.mean(g)
+    avg_b = np.mean(b)
 
-    for (_, class_name, confidence) in top_preds:
-        class_name_lower = class_name.lower()
-        for keyword in PLANT_KEYWORDS:
-            if keyword in class_name_lower:
-                return True, f"Detected: {class_name} ({confidence*100:.1f}%)"
+    # 1. Block pure neutral structures (Electronic displays, text documents, white walls)
+    # Balanced RGB channels mean gray/white/black. Biological frames always show variance.
+    if abs(avg_r - avg_g) < 6 and abs(avg_g - avg_b) < 6:
+        return False, "This photo does not appear to contain a valid biological leaf canvas."
 
-    # Log what it actually saw for debugging
-    top_labels = [f"{name}({conf*100:.1f}%)" for (_, name, conf) in top_preds]
-    return False, f"Not a plant. Top predictions: {', '.join(top_labels)}"
+    # 2. Safety Valve: Drop completely blue or red solid artifact blocks
+    if avg_b > (avg_g + 40) or avg_r > (avg_g + 50):
+        return False, "The color profile does not match an agricultural green crop leaf."
+
+    return True, "Valid"
 
 
-def parse_class_name(class_name):
-    parts = class_name.replace("__", "_").split("_")
-    crop = parts[0]
-    if crop == "Pepper":
-        crop = "Pepper Bell"
-    disease_parts = parts[1:] if crop != "Pepper Bell" else parts[2:]
-    disease = " ".join(disease_parts).replace("  ", " ").strip()
-    if disease.lower() == "healthy":
-        disease = "Healthy"
-    return crop, disease
+def preprocess(image_bytes):
+    img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+
+    # Run our updated non-crop firewall filter
+    is_leaf, error_message = validate_leaf_chroma(img)
+    if not is_leaf:
+        raise ValueError(error_message)
+
+    # Standardize image size for EfficientNetB3 inference
+    img_resized = img.resize((300, 300))
+    arr = np.array(img_resized) / 255.0
+    return np.expand_dims(arr, axis=0)
 
 
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
-    if "image" not in request.files:
-        return jsonify({"error": "No image provided."}), 400
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided.'}), 400
 
-    file = request.files["image"]
-    if file.filename == "":
-        return jsonify({"error": "Empty filename provided."}), 400
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'Empty filename.'}), 400
 
     try:
-        img_bytes = file.read()
-        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+        image_bytes = file.read()
+        tensor = preprocess(image_bytes)
+    except ValueError as val_err:
+        return jsonify({
+            'success': False,
+            'error': str(val_err),
+            'crop': 'Unknown',
+            'crop_confidence': 0.0
+        }), 422
+    except Exception as e:
+        return jsonify({'error': f'Invalid image file: {str(e)}'}), 400
 
-        # Gate check — reject non-plant images before disease model
-        is_plant, reason = is_plant_image(img)
-        if not is_plant:
+    try:
+        # ---------------------------------------------------------
+        # STAGE 1: CROP SELECTION
+        # ---------------------------------------------------------
+        crop_probs = model1.predict(tensor, verbose=0)[0]
+        crop_idx = int(np.argmax(crop_probs))
+        crop_conf = float(crop_probs[crop_idx])
+        crop_name = idx_to_crop[str(crop_idx)]
+
+        # Get the runner-up crop guess in case of close ambiguity (e.g., Mango vs Tomato)
+        sorted_crop_indices = np.argsort(crop_probs)[::-1]
+        runner_up_idx = int(sorted_crop_indices[1])
+        runner_up_name = idx_to_crop[str(runner_up_idx)]
+
+        # Defensive Gate: If the network is guessing wildly across all 11 classes, reject it
+        if crop_conf < 0.60 or crop_name == 'Unknown':
             return jsonify({
-                "success": False,
-                "error": "The image does not appear to contain a crop leaf. Please upload a clear photo of a plant leaf.",
-                "debug": reason
+                'success': False,
+                'error': 'The plant leaf is not supported by AgriGuard, or the image is too blurry. Please try again.',
+                'crop': 'Unknown',
+                'crop_confidence': round(crop_conf, 4)
             }), 422
 
-        # Passed gate — run disease model
-        img_resized = img.resize((224, 224))
-        img_array = np.array(img_resized) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
+        # ---------------------------------------------------------
+        # STAGE 2: DISEASE EVALUATION
+        # ---------------------------------------------------------
+        disease_probs = model2.predict(tensor, verbose=0)[0]
 
-        predictions = model.predict(img_array, verbose=0)
-        predicted_index = int(np.argmax(predictions[0]))
-        confidence = float(np.max(predictions[0]))
+        # Pull candidate diseases for the primary crop guess
+        candidates = crop_disease_map.get(crop_name, [])
 
-        class_name = class_indices[str(predicted_index)]
-        crop, disease = parse_class_name(class_name)
+        if candidates:
+            best_primary_idx, best_primary_label = max(candidates, key=lambda x: disease_probs[x[0]])
+            primary_disease_conf = float(disease_probs[best_primary_idx])
+        else:
+            best_primary_idx = int(np.argmax(disease_probs))
+            best_primary_label = idx_to_disease[str(best_primary_idx)]
+            primary_disease_conf = float(disease_probs[best_primary_idx])
+
+        # Dynamic Fallback: If the primary crop diagnosis yields a terrible disease match (< 30%),
+        # but the runner-up crop guess has candidate diseases, check the runner-up crop's profile instead.
+        if primary_disease_conf < 0.30 and crop_probs[runner_up_idx] > 0.20:
+            runner_candidates = crop_disease_map.get(runner_up_name, [])
+            if runner_candidates:
+                best_runner_idx, best_runner_label = max(runner_candidates, key=lambda x: disease_probs[x[0]])
+                runner_disease_conf = float(disease_probs[best_runner_idx])
+
+                # If the runner-up crop gives a much better disease diagnosis, swap to it!
+                if runner_disease_conf > primary_disease_conf:
+                    crop_name = runner_up_name
+                    crop_conf = float(crop_probs[runner_up_idx])
+                    best_primary_idx = best_runner_idx
+                    best_primary_label = best_runner_label
+                    primary_disease_conf = runner_disease_conf
+
+        # Final Disease Gate: If even after checking fallbacks the confidence is too low, reject it
+        if primary_disease_conf < 0.50:
+            return jsonify({
+                'success': False,
+                'error': 'The model recognizes the crop structure but cannot reliably diagnose any disease anomalies. Ensure proper lighting.',
+                'crop': crop_name,
+                'crop_confidence': round(crop_conf, 4)
+            }), 422
+
+        # Formatting strings for mobile UI view
+        disease_name = best_primary_label[:best_primary_label.rfind('(')].strip() if '(' in best_primary_label else best_primary_label
+        is_healthy = 'healthy' in best_primary_label.lower()
 
         return jsonify({
-            "success": True,
-            "crop": crop,
-            "disease": disease,
-            "class_name": class_name,
-            "confidence": round(confidence * 100, 2),
-            "is_healthy": disease.lower() == "healthy"
-        })
+            'success': True,
+            'crop': crop_name.strip(),
+            'crop_confidence': round(crop_conf, 4),
+            'disease': disease_name.strip(),
+            'disease_label': best_primary_label.strip(), # Must match MongoDB values exactly
+            'disease_confidence': round(primary_disease_conf, 4),
+            'confidence': round(primary_disease_conf * 100, 2),
+            'is_healthy': is_healthy
+        }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+        return jsonify({'error': str(e)}), 500
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port=5000)
