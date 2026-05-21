@@ -79,7 +79,8 @@ export const detectDisease = async (imageUri) => {
     return { mlResult, pesticideData };
 
   } catch (globalError) {
-    console.error('Core Detection Failed:', globalError.message);
+    // FIXED: Swapped console.error for console.log to suppress Expo's unstyled system toast notification
+    console.log('Core Detection Intercept Log:', globalError.message);
     throw globalError;
   }
 };
