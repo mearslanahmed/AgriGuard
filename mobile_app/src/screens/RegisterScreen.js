@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, ToastAndroid, Alert
+  ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, ToastAndroid, Alert, Image
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { sendOtpToEmail, registerUser } from '../services/authService';
@@ -23,7 +23,7 @@ export default function RegisterScreen({ navigation }) {
   const passwordRef = useRef(null);
   const otpRef = useRef(null);
 
-  // Modern Toast alert wrapper
+  // Fallback notification wrapper for cross-platform alerts
   const showNotification = (msg) => {
     if (Platform.OS === 'android') {
       ToastAndroid.showWithGravityAndOffset(msg, ToastAndroid.LONG, ToastAndroid.BOTTOM, 0, 50);
@@ -83,11 +83,13 @@ export default function RegisterScreen({ navigation }) {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         
+        {/* Render premium logo asset from assets/logo-light.png */}
         <View style={styles.headerSection}>
-          <View style={styles.logoBadge}>
-            <Ionicons name="leaf" size={32} color="#2e7d32" />
-          </View>
-          <Text style={styles.title}>AgriGuard</Text>
+          <Image 
+            source={require('../../assets/logo-light.png')} 
+            style={styles.brandingLogo} 
+            resizeMode="contain"
+          />
           <Text style={styles.subtitle}>Verified Farmer Registration Platform</Text>
         </View>
 
@@ -167,7 +169,7 @@ export default function RegisterScreen({ navigation }) {
                 <Ionicons name="shield-checkmark-outline" size={20} color="#2e7d32" style={styles.inputIcon} />
                 <TextInput
                   ref={otpRef}
-                  style={[styles.input, styles.otpInputText]}
+                  style={styles.input, styles.otpInputText}
                   placeholder="000000"
                   placeholderTextColor="#a0a0a0"
                   keyboardType="number-pad"
@@ -210,10 +212,28 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   scrollContainer: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 20 },
-  headerSection: { alignItems: 'center', marginBottom: 20 },
-  logoBadge: { backgroundColor: '#e8f5e9', padding: 14, borderRadius: 18, marginBottom: 12 },
-  title: { fontSize: 30, fontWeight: '800', color: '#2e7d32', letterSpacing: 0.5 },
-  subtitle: { fontSize: 13, color: '#666', textAlign: 'center', marginTop: 4, paddingHorizontal: 20, lineHeight: 18 },
+  
+  // Layout definitions for the graphic branding banner
+  headerSection: { 
+    alignItems: 'center', 
+    marginBottom: 32,
+    marginTop: 40 
+  },
+  brandingLogo: { 
+    width: 240, 
+    height: 65, 
+    marginBottom: 8,
+    backgroundColor: 'transparent'
+  },
+  subtitle: { 
+    fontSize: 14, 
+    color: '#4e5451', 
+    textAlign: 'center', 
+    fontWeight: '600', 
+    paddingHorizontal: 10, 
+    lineHeight: 20,
+    letterSpacing: 0.2
+  },
   cardContainer: { backgroundColor: '#fff', borderRadius: 20, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 4 },
   cardHeaderTitle: { fontSize: 18, fontWeight: '700', color: '#333', marginBottom: 20 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fafafa', borderWidth: 1, borderColor: '#eef0ef', borderRadius: 12, paddingHorizontal: 14, marginBottom: 16, height: 52 },
