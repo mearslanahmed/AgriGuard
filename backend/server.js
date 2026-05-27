@@ -1,4 +1,5 @@
 require('dotenv').config();
+console.log('ESP_CAM_IP:', process.env.ESP_CAM_IP);
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
@@ -16,6 +17,7 @@ app.use(express.json()); // parse JSON request bodies
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/pesticides', require('./routes/pesticideRoutes'));
 app.use('/api/scans', require('./routes/scanRoutes'));
+app.use('/api/esp', require('./routes/espRoutes')); 
 
 // Health check — useful to confirm server is running
 app.get('/health', (req, res) => {

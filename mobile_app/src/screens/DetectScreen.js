@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { detectDisease } from "../services/detectService";
+import { detectDisease, detectDiseaseFromESP } from "../services/detectService";
 
 const { width } = Dimensions.get("window");
 const IMAGE_BOX_HEIGHT = width * 0.85;
@@ -23,6 +23,7 @@ const IMAGE_BOX_HEIGHT = width * 0.85;
 export default function DetectScreen({ navigation, onScanComplete }) {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [espLoading, setEspLoading] = useState(false); // ESP capture in progress
 
   // Custom Modal States for Error Interception
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -45,6 +46,7 @@ export default function DetectScreen({ navigation, onScanComplete }) {
   const cameraScale = useRef(new Animated.Value(1)).current;
   const galleryScale = useRef(new Animated.Value(1)).current;
   const analyzeScale = useRef(new Animated.Value(1)).current;
+  const espScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.stagger(100, [
@@ -143,13 +145,34 @@ export default function DetectScreen({ navigation, onScanComplete }) {
     if (!result.canceled) setImage(result.assets[0].uri);
   };
 
+  // Triggers ESP32-CAM capture, downloads the image, then runs full detection pipeline
+  const handleESPDetect = async () => {
+    setEspLoading(true);
+    try {
+      const { mlResult, pesticideData } = await detectDiseaseFromESP();
+
+      if (onScanComplete) onScanComplete();
+
+      navigation.navigate("Result", {
+        mlResult,
+        pesticideData,
+        imageUri: null, // no local URI for ESP captures
+      });
+    } catch (err) {
+      setErrorMessage(err.message);
+      setErrorModalVisible(true);
+    } finally {
+      setEspLoading(false);
+    }
+  };
+
   const handleDetect = async () => {
     if (!image) return;
     setLoading(true);
     try {
       const { mlResult, pesticideData } = await detectDisease(image);
 
-      // FIXED: Only call execution hooks when detection succeeds to avoid unwanted logs
+      // Only call execution hooks when detection succeeds to avoid unwanted logs
       if (onScanComplete) onScanComplete();
 
       navigation.navigate("Result", {
@@ -217,15 +240,27 @@ export default function DetectScreen({ navigation, onScanComplete }) {
               </>
             ) : (
               <View style={styles.emptyState}>
-                <Animated.View style={{ opacity: pulse }}>
-                  <View style={styles.iconCircle}>
-                    <Ionicons name="leaf-outline" size={32} color="#2e7d32" />
-                  </View>
-                </Animated.View>
-                <Text style={styles.emptyTitle}>No leaf image selected</Text>
-                <Text style={styles.emptyHint}>
-                  Take a photo or choose from your gallery below
-                </Text>
+                {espLoading ? (
+                  // Shown while ESP32-CAM is capturing and downloading
+                  <>
+                    <ActivityIndicator size="large" color="#2e7d32" />
+                    <Text style={[styles.emptyTitle, { marginTop: 16 }]}>
+                      Capturing from Plant Camera...
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Animated.View style={{ opacity: pulse }}>
+                      <View style={styles.iconCircle}>
+                        <Ionicons name="leaf-outline" size={32} color="#2e7d32" />
+                      </View>
+                    </Animated.View>
+                    <Text style={styles.emptyTitle}>No leaf image selected</Text>
+                    <Text style={styles.emptyHint}>
+                      Take a photo or choose from your gallery below
+                    </Text>
+                  </>
+                )}
               </View>
             )}
           </View>
@@ -285,6 +320,35 @@ export default function DetectScreen({ navigation, onScanComplete }) {
             </Animated.View>
           </View>
 
+          {/* ESP32-CAM capture button — triggers plant camera scan directly */}
+          <Animated.View style={{ transform: [{ scale: espScale }] }}>
+            <TouchableOpacity
+              style={[
+                styles.espButton,
+                espLoading && styles.analyzeButtonDisabled,
+              ]}
+              onPress={handleESPDetect}
+              onPressIn={() => !espLoading && pressIn(espScale)}
+              onPressOut={() => pressOut(espScale)}
+              disabled={espLoading || loading}
+              activeOpacity={1}
+            >
+              {espLoading ? (
+                <ActivityIndicator color="#2e7d32" />
+              ) : (
+                <>
+                  <Ionicons
+                    name="videocam"
+                    size={18}
+                    color="#2e7d32"
+                    style={styles.btnIcon}
+                  />
+                  <Text style={styles.espButtonText}>Scan with Plant Camera</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
+
           <Animated.View style={{ transform: [{ scale: analyzeScale }] }}>
             <TouchableOpacity
               style={[
@@ -322,9 +386,6 @@ export default function DetectScreen({ navigation, onScanComplete }) {
         </Animated.View>
       </View>
 
-      {/* ========================================================
-          BEAUTIFUL OVERLAY CARD MODAL RESTORED
-         ======================================================== */}
       <Modal
         visible={errorModalVisible}
         animationType="fade"
@@ -466,6 +527,18 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: { color: "#2e7d32", fontWeight: "700", fontSize: 15 },
   btnIcon: { marginRight: 6 },
+  // ESP button styled as outlined green — distinct from the filled analyze button
+  espButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#2e7d32",
+    borderRadius: 12,
+    height: 50,
+    backgroundColor: "#f1f8f1",
+  },
+  espButtonText: { color: "#2e7d32", fontWeight: "700", fontSize: 15 },
   analyzeButton: {
     flexDirection: "row",
     alignItems: "center",
