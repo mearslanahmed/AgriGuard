@@ -16,5 +16,6 @@ router.get('/wroom/auto/on', protect, autoOnHandler);
 router.get('/wroom/auto/off', protect, autoOffHandler);
 
 router.post('/register', registerDevice);
+router.get('/list', listDevices);
 
 module.exports = router;

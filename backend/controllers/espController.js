@@ -98,4 +98,14 @@ const registerDevice = async (req, res) => {
   }
 };
 
-module.exports = { capture, status, wroomStatus, pumpOnHandler, pumpOffHandler, autoWaterHandler, autoOnHandler, autoOffHandler, registerDevice };
+const listDevices = async (req, res) => {
+  try {
+    const devices = await EspDevice.find({});
+    res.json(devices);
+  } catch (err) {
+    console.error('List devices error:', err.message);
+    res.status(500).json({ message: 'Failed to retrieve devices.' });
+  }
+};
+
+module.exports = { capture, status, wroomStatus, pumpOnHandler, pumpOffHandler, autoWaterHandler, autoOnHandler, autoOffHandler, registerDevice, listDevices };
