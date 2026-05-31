@@ -5,7 +5,6 @@ import io
 from flask import Flask, request, jsonify
 from PIL import Image
 from huggingface_hub import hf_hub_download
-# Import core Keras engine layers
 from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
@@ -16,26 +15,26 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 BASE = os.path.dirname(__file__)
 MODEL_DIR = os.path.join(BASE, 'model')
 
+# --- DEPLOYMENT CONFIGURATION ---
+# Set 'DEPLOY_ENV' to 'render' in your Render Environment Variables
+IS_RENDER = os.environ.get('DEPLOY_ENV') == 'render'
 
-# LOAD CORE APPLICATION ARTIFACTS WITH VERIFIED FILENAMES
-
-# print("Loading crop classifier (Model 1)...")
-# model1 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras'))
-
-# print("Loading disease classifier (Model 2)...")
-# model2 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras'))
-
-
-# 1. DOWNLOAD MODELS FROM HUGGING FACE
-print("Fetching models from Hugging Face...")
-model1_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model1_Final.keras")
-model2_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model2_Final.keras")
+# 1. DOWNLOAD OR LOCATE MODELS
+if IS_RENDER:
+    print("Fetching models from Hugging Face...")
+    model1_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model1_Final.keras")
+    model2_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model2_Final.keras")
+else:
+    print("Loading models from local directory...")
+    model1_path = os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras')
+    model2_path = os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras')
 
 # 2. LOAD MODELS
 print("Loading models into memory...")
 model1 = load_model(model1_path)
 model2 = load_model(model2_path)
 
+# 3. LOAD MAPPINGS
 with open(os.path.join(MODEL_DIR, 'model1_crop_mapping.json')) as f:
     idx_to_crop = json.load(f)
 
@@ -49,17 +48,12 @@ for idx_str, label in idx_to_disease.items():
         crop = label[label.rfind('(') + 1:-1]
         crop_disease_map.setdefault(crop, []).append((int(idx_str), label))
 
-
 def preprocess(image_bytes):
-    """
-    Standardizes incoming byte arrays for EfficientNetB3 inference.
-    Aggressive chroma filtering removed to protect chlorotic/dried crop signatures.
-    """
+    """Standardizes incoming byte arrays for EfficientNetB3 inference."""
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     img_resized = img.resize((300, 300))
     arr = np.array(img_resized) / 255.0
     return np.expand_dims(arr, axis=0)
-
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -77,21 +71,16 @@ def predict():
         return jsonify({'error': f'Invalid image file: {str(e)}'}), 400
 
     try:
-        
         # STAGE 1: CROP SELECTION
-        
         crop_probs = model1.predict(tensor, verbose=0)[0]
         crop_idx = int(np.argmax(crop_probs))
         crop_conf = float(crop_probs[crop_idx])
         crop_name = idx_to_crop[str(crop_idx)]
 
-        # Get the runner-up crop guess in case of close ambiguity (e.g., Mango vs Tomato)
         sorted_crop_indices = np.argsort(crop_probs)[::-1]
         runner_up_idx = int(sorted_crop_indices[1])
         runner_up_name = idx_to_crop[str(runner_up_idx)]
 
-        # Optimized Threshold: Adjusted to 0.45 to support field conditions.
-        # Native 'Unknown' class handles non-plant noise filters.
         if crop_conf < 0.45 or crop_name == 'Unknown':
             return jsonify({
                 'success': False,
@@ -99,13 +88,9 @@ def predict():
                 'crop': 'Unknown',
                 'crop_confidence': round(crop_conf, 4)
             }), 422
-
         
         # STAGE 2: DISEASE EVALUATION
-        
         disease_probs = model2.predict(tensor, verbose=0)[0]
-
-        # Pull candidate diseases for the primary crop guess
         candidates = crop_disease_map.get(crop_name, [])
 
         if candidates:
@@ -116,15 +101,12 @@ def predict():
             best_primary_label = idx_to_disease[str(best_primary_idx)]
             primary_disease_conf = float(disease_probs[best_primary_idx])
 
-        # Dynamic Fallback: If primary crop yields a poor disease match (< 30%),
-        # but the runner-up crop guess has candidate diseases, check the runner-up instead.
+        # Dynamic Fallback
         if primary_disease_conf < 0.30 and crop_probs[runner_up_idx] > 0.20:
             runner_candidates = crop_disease_map.get(runner_up_name, [])
             if runner_candidates:
                 best_runner_idx, best_runner_label = max(runner_candidates, key=lambda x: disease_probs[x[0]])
                 runner_disease_conf = float(disease_probs[best_runner_idx])
-
-                # If the runner-up crop gives a much better disease diagnosis, swap to it!
                 if runner_disease_conf > primary_disease_conf:
                     crop_name = runner_up_name
                     crop_conf = float(crop_probs[runner_up_idx])
@@ -132,7 +114,7 @@ def predict():
                     best_primary_label = best_runner_label
                     primary_disease_conf = runner_disease_conf
 
-        # Optimized Disease Gate: Lowered to 0.35 to catch early/subtle infections
+        # Optimized Disease Gate
         if primary_disease_conf < 0.35:
             return jsonify({
                 'success': False,
@@ -141,7 +123,6 @@ def predict():
                 'crop_confidence': round(crop_conf, 4)
             }), 422
 
-        # Formatting strings for mobile UI view
         disease_name = best_primary_label[:best_primary_label.rfind('(')].strip() if '(' in best_primary_label else best_primary_label
         is_healthy = 'healthy' in best_primary_label.lower()
 
@@ -150,7 +131,7 @@ def predict():
             'crop': crop_name.strip(),
             'crop_confidence': round(crop_conf, 4),
             'disease': disease_name.strip(),
-            'disease_label': best_primary_label.strip(), # Matches MongoDB values exactly
+            'disease_label': best_primary_label.strip(),
             'disease_confidence': round(primary_disease_conf, 4),
             'confidence': round(primary_disease_conf * 100, 2),
             'is_healthy': is_healthy
@@ -159,6 +140,6 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
