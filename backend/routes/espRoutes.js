@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { capture, status, wroomStatus, pumpOnHandler, pumpOffHandler, autoWaterHandler, autoOnHandler, autoOffHandler, registerDevice } = require('../controllers/espController');
+const { capture, status, wroomStatus, pumpOnHandler, pumpOffHandler, autoWaterHandler, autoOnHandler, autoOffHandler, registerDevice, listDevices } = require('../controllers/espController');
 const { protect } = require('../middleware/authMiddleware');
 
 // ESP32-CAM routes
