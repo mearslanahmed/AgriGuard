@@ -4,7 +4,7 @@ import numpy as np
 import io
 from flask import Flask, request, jsonify
 from PIL import Image
-
+from huggingface_hub import hf_hub_download
 # Import core Keras engine layers
 from tensorflow.keras.models import load_model
 
@@ -19,11 +19,22 @@ MODEL_DIR = os.path.join(BASE, 'model')
 
 # LOAD CORE APPLICATION ARTIFACTS WITH VERIFIED FILENAMES
 
-print("Loading crop classifier (Model 1)...")
-model1 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras'))
+# print("Loading crop classifier (Model 1)...")
+# model1 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras'))
 
-print("Loading disease classifier (Model 2)...")
-model2 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras'))
+# print("Loading disease classifier (Model 2)...")
+# model2 = load_model(os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras'))
+
+
+# 1. DOWNLOAD MODELS FROM HUGGING FACE
+print("Fetching models from Hugging Face...")
+model1_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model1_Final.keras")
+model2_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model2_Final.keras")
+
+# 2. LOAD MODELS
+print("Loading models into memory...")
+model1 = load_model(model1_path)
+model2 = load_model(model2_path)
 
 with open(os.path.join(MODEL_DIR, 'model1_crop_mapping.json')) as f:
     idx_to_crop = json.load(f)
