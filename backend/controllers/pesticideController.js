@@ -11,7 +11,7 @@ const getPesticideByClass = async (req, res) => {
 
     // Anchored case-insensitive regular expression match to eliminate string discrepancies
     const record = await Pesticide.findOne({
-      disease_label: { $regex: new RegExp(`^${escapedParam}$`, 'i') }
+      class_name: { $regex: new RegExp(`^${escapedParam}$`, 'i') }
     });
 
     if (!record) {

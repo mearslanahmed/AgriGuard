@@ -4,7 +4,7 @@ import numpy as np
 import io
 from flask import Flask, request, jsonify
 from PIL import Image
-from huggingface_hub import hf_hub_download
+# from huggingface_hub import hf_hub_download
 from tensorflow.keras.models import load_model
 
 app = Flask(__name__)

@@ -5,7 +5,7 @@ const Pesticide = require('../models/Pesticide');
 const data = [
   // ─── APPLE ────────────────────────────────────────────────
   {
-    disease_label: 'Apple Scab (Apple)',
+    class_name: 'Apple Scab (Apple)',
     crop: 'Apple',
     disease: 'Apple Scab',
     is_healthy: false,
@@ -19,7 +19,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Black Rot (Apple)',
+    class_name: 'Black Rot (Apple)',
     crop: 'Apple',
     disease: 'Black Rot',
     is_healthy: false,
@@ -33,7 +33,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Cedar Apple Rust (Apple)',
+    class_name: 'Cedar Apple Rust (Apple)',
     crop: 'Apple',
     disease: 'Cedar Apple Rust',
     is_healthy: false,
@@ -47,7 +47,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Apple)',
+    class_name: 'Healthy (Apple)',
     crop: 'Apple',
     disease: 'Healthy',
     is_healthy: true,
@@ -63,7 +63,7 @@ const data = [
 
   // ─── CORN ─────────────────────────────────────────────────
   {
-    disease_label: 'Blight (Corn)',
+    class_name: 'Blight (Corn)',
     crop: 'Corn',
     disease: 'Blight',
     is_healthy: false,
@@ -77,7 +77,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Common Rust (Corn)',
+    class_name: 'Common Rust (Corn)',
     crop: 'Corn',
     disease: 'Common Rust',
     is_healthy: false,
@@ -91,7 +91,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Gray Leaf Spot (Corn)',
+    class_name: 'Gray Leaf Spot (Corn)',
     crop: 'Corn',
     disease: 'Gray Leaf Spot',
     is_healthy: false,
@@ -105,7 +105,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Northern Blight (Corn)',
+    class_name: 'Northern Blight (Corn)',
     crop: 'Corn',
     disease: 'Northern Blight',
     is_healthy: false,
@@ -119,7 +119,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Corn)',
+    class_name: 'Healthy (Corn)',
     crop: 'Corn',
     disease: 'Healthy',
     is_healthy: true,
@@ -135,7 +135,7 @@ const data = [
 
   // ─── COTTON ───────────────────────────────────────────────
   {
-    disease_label: 'Aphids (Cotton)',
+    class_name: 'Aphids (Cotton)',
     crop: 'Cotton',
     disease: 'Aphids',
     is_healthy: false,
@@ -149,7 +149,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Bacterial Blight (Cotton)',
+    class_name: 'Bacterial Blight (Cotton)',
     crop: 'Cotton',
     disease: 'Bacterial Blight',
     is_healthy: false,
@@ -163,7 +163,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Powdery Mildew (Cotton)',
+    class_name: 'Powdery Mildew (Cotton)',
     crop: 'Cotton',
     disease: 'Powdery Mildew',
     is_healthy: false,
@@ -177,7 +177,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Target Spot (Cotton)',
+    class_name: 'Target Spot (Cotton)',
     crop: 'Cotton',
     disease: 'Target Spot',
     is_healthy: false,
@@ -191,7 +191,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Cotton)',
+    class_name: 'Healthy (Cotton)',
     crop: 'Cotton',
     disease: 'Healthy',
     is_healthy: true,
@@ -207,7 +207,7 @@ const data = [
 
   // ─── GRAPE ────────────────────────────────────────────────
   {
-    disease_label: 'Black Rot (Grape)',
+    class_name: 'Black Rot (Grape)',
     crop: 'Grape',
     disease: 'Black Rot',
     is_healthy: false,
@@ -221,7 +221,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Esca (Grape)',
+    class_name: 'Esca (Grape)',
     crop: 'Grape',
     disease: 'Esca',
     is_healthy: false,
@@ -235,7 +235,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Leaf Blight (Grape)',
+    class_name: 'Leaf Blight (Grape)',
     crop: 'Grape',
     disease: 'Leaf Blight',
     is_healthy: false,
@@ -249,7 +249,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Grape)',
+    class_name: 'Healthy (Grape)',
     crop: 'Grape',
     disease: 'Healthy',
     is_healthy: true,
@@ -265,7 +265,7 @@ const data = [
 
   // ─── MANGO ────────────────────────────────────────────────
   {
-    disease_label: 'Anthracnose (Mango)',
+    class_name: 'Anthracnose (Mango)',
     crop: 'Mango',
     disease: 'Anthracnose',
     is_healthy: false,
@@ -279,7 +279,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Bacterial Canker (Mango)',
+    class_name: 'Bacterial Canker (Mango)',
     crop: 'Mango',
     disease: 'Bacterial Canker',
     is_healthy: false,
@@ -293,7 +293,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Cutting Weevil (Mango)',
+    class_name: 'Cutting Weevil (Mango)',
     crop: 'Mango',
     disease: 'Cutting Weevil',
     is_healthy: false,
@@ -307,7 +307,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Die Back (Mango)',
+    class_name: 'Die Back (Mango)',
     crop: 'Mango',
     disease: 'Die Back',
     is_healthy: false,
@@ -321,7 +321,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Gall Midge (Mango)',
+    class_name: 'Gall Midge (Mango)',
     crop: 'Mango',
     disease: 'Gall Midge',
     is_healthy: false,
@@ -335,7 +335,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Powdery Mildew (Mango)',
+    class_name: 'Powdery Mildew (Mango)',
     crop: 'Mango',
     disease: 'Powdery Mildew',
     is_healthy: false,
@@ -349,7 +349,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Sooty Mould (Mango)',
+    class_name: 'Sooty Mould (Mango)',
     crop: 'Mango',
     disease: 'Sooty Mould',
     is_healthy: false,
@@ -363,7 +363,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Mango)',
+    class_name: 'Healthy (Mango)',
     crop: 'Mango',
     disease: 'Healthy',
     is_healthy: true,
@@ -379,7 +379,7 @@ const data = [
 
   // ─── POTATO ───────────────────────────────────────────────
   {
-    disease_label: 'Early Blight (Potato)',
+    class_name: 'Early Blight (Potato)',
     crop: 'Potato',
     disease: 'Early Blight',
     is_healthy: false,
@@ -393,7 +393,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Late Blight (Potato)',
+    class_name: 'Late Blight (Potato)',
     crop: 'Potato',
     disease: 'Late Blight',
     is_healthy: false,
@@ -407,7 +407,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Potato)',
+    class_name: 'Healthy (Potato)',
     crop: 'Potato',
     disease: 'Healthy',
     is_healthy: true,
@@ -423,7 +423,7 @@ const data = [
 
   // ─── RICE ─────────────────────────────────────────────────
   {
-    disease_label: 'Bacterial Blight (Rice)',
+    class_name: 'Bacterial Blight (Rice)',
     crop: 'Rice',
     disease: 'Bacterial Blight',
     is_healthy: false,
@@ -437,7 +437,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Brown Spot (Rice)',
+    class_name: 'Brown Spot (Rice)',
     crop: 'Rice',
     disease: 'Brown Spot',
     is_healthy: false,
@@ -451,7 +451,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Rice)',
+    class_name: 'Healthy (Rice)',
     crop: 'Rice',
     disease: 'Healthy',
     is_healthy: true,
@@ -465,7 +465,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Hispa (Rice)',
+    class_name: 'Hispa (Rice)',
     crop: 'Rice',
     disease: 'Hispa',
     is_healthy: false,
@@ -479,7 +479,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Leaf Blast (Rice)',
+    class_name: 'Leaf Blast (Rice)',
     crop: 'Rice',
     disease: 'Leaf Blast',
     is_healthy: false,
@@ -493,7 +493,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Leaf Scald (Rice)',
+    class_name: 'Leaf Scald (Rice)',
     crop: 'Rice',
     disease: 'Leaf Scald',
     is_healthy: false,
@@ -507,7 +507,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Sheath Blight (Rice)',
+    class_name: 'Sheath Blight (Rice)',
     crop: 'Rice',
     disease: 'Sheath Blight',
     is_healthy: false,
@@ -523,7 +523,7 @@ const data = [
 
   // ─── SUGARCANE ────────────────────────────────────────────
   {
-    disease_label: 'Bacterial Blight (Sugarcane)',
+    class_name: 'Bacterial Blight (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Bacterial Blight',
     is_healthy: false,
@@ -537,7 +537,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Banded Chlorosis (Sugarcane)',
+    class_name: 'Banded Chlorosis (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Banded Chlorosis',
     is_healthy: false,
@@ -551,7 +551,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Brown Rust (Sugarcane)',
+    class_name: 'Brown Rust (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Brown Rust',
     is_healthy: false,
@@ -565,7 +565,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Brown Spot (Sugarcane)',
+    class_name: 'Brown Spot (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Brown Spot',
     is_healthy: false,
@@ -579,7 +579,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Grassy Shoot (Sugarcane)',
+    class_name: 'Grassy Shoot (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Grassy Shoot',
     is_healthy: false,
@@ -593,7 +593,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Sugarcane)',
+    class_name: 'Healthy (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Healthy',
     is_healthy: true,
@@ -607,7 +607,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Mosaic (Sugarcane)',
+    class_name: 'Mosaic (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Mosaic',
     is_healthy: false,
@@ -621,7 +621,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Pokkah Boeng (Sugarcane)',
+    class_name: 'Pokkah Boeng (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Pokkah Boeng',
     is_healthy: false,
@@ -635,7 +635,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Red Rot (Sugarcane)',
+    class_name: 'Red Rot (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Red Rot',
     is_healthy: false,
@@ -649,7 +649,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Rust (Sugarcane)',
+    class_name: 'Rust (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Rust',
     is_healthy: false,
@@ -663,7 +663,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Sett Rot (Sugarcane)',
+    class_name: 'Sett Rot (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Sett Rot',
     is_healthy: false,
@@ -677,7 +677,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Smut (Sugarcane)',
+    class_name: 'Smut (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Smut',
     is_healthy: false,
@@ -691,7 +691,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Viral Disease (Sugarcane)',
+    class_name: 'Viral Disease (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Viral Disease',
     is_healthy: false,
@@ -705,7 +705,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Yellow Leaf (Sugarcane)',
+    class_name: 'Yellow Leaf (Sugarcane)',
     crop: 'Sugarcane',
     disease: 'Yellow Leaf',
     is_healthy: false,
@@ -721,7 +721,7 @@ const data = [
 
   // ─── TOMATO ───────────────────────────────────────────────
   {
-    disease_label: 'Bacterial Spot (Tomato)',
+    class_name: 'Bacterial Spot (Tomato)',
     crop: 'Tomato',
     disease: 'Bacterial Spot',
     is_healthy: false,
@@ -735,7 +735,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Early Blight (Tomato)',
+    class_name: 'Early Blight (Tomato)',
     crop: 'Tomato',
     disease: 'Early Blight',
     is_healthy: false,
@@ -749,7 +749,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Late Blight (Tomato)',
+    class_name: 'Late Blight (Tomato)',
     crop: 'Tomato',
     disease: 'Late Blight',
     is_healthy: false,
@@ -763,7 +763,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Leaf Mold (Tomato)',
+    class_name: 'Leaf Mold (Tomato)',
     crop: 'Tomato',
     disease: 'Leaf Mold',
     is_healthy: false,
@@ -777,7 +777,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Mosaic Virus (Tomato)',
+    class_name: 'Mosaic Virus (Tomato)',
     crop: 'Tomato',
     disease: 'Mosaic Virus',
     is_healthy: false,
@@ -791,7 +791,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Powdery Mildew (Tomato)',
+    class_name: 'Powdery Mildew (Tomato)',
     crop: 'Tomato',
     disease: 'Powdery Mildew',
     is_healthy: false,
@@ -805,7 +805,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Septoria Leaf Spot (Tomato)',
+    class_name: 'Septoria Leaf Spot (Tomato)',
     crop: 'Tomato',
     disease: 'Septoria Leaf Spot',
     is_healthy: false,
@@ -819,7 +819,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Spider Mites (Tomato)',
+    class_name: 'Spider Mites (Tomato)',
     crop: 'Tomato',
     disease: 'Spider Mites',
     is_healthy: false,
@@ -833,7 +833,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Target Spot (Tomato)',
+    class_name: 'Target Spot (Tomato)',
     crop: 'Tomato',
     disease: 'Target Spot',
     is_healthy: false,
@@ -847,7 +847,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Yellow Leaf Curl Virus (Tomato)',
+    class_name: 'Yellow Leaf Curl Virus (Tomato)',
     crop: 'Tomato',
     disease: 'Yellow Leaf Curl Virus',
     is_healthy: false,
@@ -861,7 +861,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Tomato)',
+    class_name: 'Healthy (Tomato)',
     crop: 'Tomato',
     disease: 'Healthy',
     is_healthy: true,
@@ -877,7 +877,7 @@ const data = [
 
   // ─── WHEAT ────────────────────────────────────────────────
   {
-    disease_label: 'Aphids (Wheat)',
+    class_name: 'Aphids (Wheat)',
     crop: 'Wheat',
     disease: 'Aphids',
     is_healthy: false,
@@ -891,7 +891,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Black Rust (Wheat)',
+    class_name: 'Black Rust (Wheat)',
     crop: 'Wheat',
     disease: 'Black Rust',
     is_healthy: false,
@@ -905,7 +905,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Blast (Wheat)',
+    class_name: 'Blast (Wheat)',
     crop: 'Wheat',
     disease: 'Blast',
     is_healthy: false,
@@ -919,7 +919,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Brown Rust (Wheat)',
+    class_name: 'Brown Rust (Wheat)',
     crop: 'Wheat',
     disease: 'Brown Rust',
     is_healthy: false,
@@ -933,7 +933,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Common Root Rot (Wheat)',
+    class_name: 'Common Root Rot (Wheat)',
     crop: 'Wheat',
     disease: 'Common Root Rot',
     is_healthy: false,
@@ -947,7 +947,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Fusarium Head Blight (Wheat)',
+    class_name: 'Fusarium Head Blight (Wheat)',
     crop: 'Wheat',
     disease: 'Fusarium Head Blight',
     is_healthy: false,
@@ -961,7 +961,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Leaf Blight (Wheat)',
+    class_name: 'Leaf Blight (Wheat)',
     crop: 'Wheat',
     disease: 'Leaf Blight',
     is_healthy: false,
@@ -975,7 +975,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Mites (Wheat)',
+    class_name: 'Mites (Wheat)',
     crop: 'Wheat',
     disease: 'Mites',
     is_healthy: false,
@@ -989,7 +989,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Powdery Mildew (Wheat)',
+    class_name: 'Powdery Mildew (Wheat)',
     crop: 'Wheat',
     disease: 'Powdery Mildew',
     is_healthy: false,
@@ -1003,7 +1003,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Septoria (Wheat)',
+    class_name: 'Septoria (Wheat)',
     crop: 'Wheat',
     disease: 'Septoria',
     is_healthy: false,
@@ -1017,7 +1017,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Smut (Wheat)',
+    class_name: 'Smut (Wheat)',
     crop: 'Wheat',
     disease: 'Smut',
     is_healthy: false,
@@ -1031,7 +1031,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Stem Fly (Wheat)',
+    class_name: 'Stem Fly (Wheat)',
     crop: 'Wheat',
     disease: 'Stem Fly',
     is_healthy: false,
@@ -1045,7 +1045,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Tan Spot (Wheat)',
+    class_name: 'Tan Spot (Wheat)',
     crop: 'Wheat',
     disease: 'Tan Spot',
     is_healthy: false,
@@ -1059,7 +1059,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Yellow Rust (Wheat)',
+    class_name: 'Yellow Rust (Wheat)',
     crop: 'Wheat',
     disease: 'Yellow Rust',
     is_healthy: false,
@@ -1073,7 +1073,7 @@ const data = [
     },
   },
   {
-    disease_label: 'Healthy (Wheat)',
+    class_name: 'Healthy (Wheat)',
     crop: 'Wheat',
     disease: 'Healthy',
     is_healthy: true,

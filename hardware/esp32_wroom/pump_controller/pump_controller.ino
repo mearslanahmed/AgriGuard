@@ -5,8 +5,8 @@
 #include "soc/rtc_cntl_reg.h"
 #include <WiFiClientSecure.h>
 
-const char* ssid = "Naseem 2.4G";
-const char* password = "Speedo@7338467";
+const char* ssid = "Galaxy";
+const char* password = "30263026";
 const char* backendURL = "https://agriguard-g3hq.onrender.com/api/esp/register";
 
 #define RELAY_PIN       26
