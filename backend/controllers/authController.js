@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const OTP = require('../models/OTP');
-const { sendEmailViaApi } = require('../config/email');
+const transporter = require('../config/email');
 
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -35,12 +35,24 @@ const sendVerificationOTP = async (req, res) => {
     await OTP.deleteMany({ email: emailLower, purpose });
     await OTP.create({ email: emailLower, otp: hashedOtp, purpose });
 
-    const subject = purpose === 'register' ? 'Verify Your AgriGuard Account' : 'Reset Your AgriGuard Password';
-    const content = `Your verification code is ${otpCode}. This code expires in 5 minutes.`;
+    const mailOptions = {
+      from: `"AgriGuard Security" <${process.env.EMAIL_USER}>`,
+      to: emailLower,
+      subject: purpose === 'register' ? 'Verify Your AgriGuard Account' : 'Reset Your AgriGuard Password',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; border: 1px solid #eef0ef; padding: 24px; border-radius: 16px;">
+          <h2 style="color: #2e7d32; text-align: center; margin-top: 0;">AgriGuard Security</h2>
+          <p style="color: #333; font-size: 15px;">Hello,</p>
+          <p style="color: #555; font-size: 14px; line-height: 20px;">Use the following unique verification code to authorize your action. This credential block expires in <strong>5 minutes</strong>.</p>
+          <div style="background-color: #f4f6f4; padding: 16px; text-align: center; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #2e7d32; margin: 24px 0; border-radius: 12px; border: 1px solid #e2ece2;">
+            ${otpCode}
+          </div>
+          <p style="font-size: 11px; color: #999; text-align: center; margin-bottom: 0;">If you did not issue this verification query, please discard this envelope securely.</p>
+        </div>
+      `
+    };
 
-    // Use the API function instead of nodemailer transporter
-    await sendEmailViaApi(emailLower, subject, content);
-    
+    await transporter.sendMail(mailOptions);
     res.json({ success: true, message: 'Verification transaction key dispatched to your inbox.' });
 
   } catch (error) {

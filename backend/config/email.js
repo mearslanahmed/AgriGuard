@@ -1,28 +1,19 @@
-const axios = require('axios');
+const nodemailer = require('nodemailer');
 
-const sendEmailViaApi = async (email, subject, content) => {
-  try {
-    // This sends an HTTPS POST request, which Render does NOT block.
-    await axios.post('https://api.brevo.com/v3/smtp/email', {
-      sender: { 
-        name: "AgriGuard", 
-        email: process.env.VERIFIED_SENDER_EMAIL 
-      },
-      to: [{ email: email }],
-      subject: subject,
-      textContent: content
-    }, {
-      headers: { 
-        'api-key': process.env.BREVO_API_KEY,
-        'Content-Type': 'application/json' 
-      }
-    });
-    return true;
-  } catch (error) {
-    // Detailed error logging for Render dashboard
-    console.error('Brevo API Error:', error.response?.data || error.message);
-    throw error;
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASS?.replace(/\s/g, '').trim()
   }
-};
+});
 
-module.exports = { sendEmailViaApi };
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Mail Carrier Relay Refused Handshake:', error.message);
+  } else {
+    console.log('AgriGuard Secure Mail Carrier Initialized and Active');
+  }
+});
+
+module.exports = transporter;
