@@ -21,13 +21,26 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.arslan.agriguard",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "backgroundColor": "#FFFFFF"
     },
     "plugins": [
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-image-picker",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6e8ae2aa-52e1-4c45-80af-e58dc590d452"
+      }
+    }
   }
 }

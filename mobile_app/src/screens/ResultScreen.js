@@ -20,7 +20,7 @@ const getConfidenceBg = (confidence) => {
 export default function ResultScreen({ navigation, route }) {
   const { mlResult, pesticideData, imageUri } = route.params;
   const { confidence, disease, crop, is_healthy } = mlResult;
-  const p = pesticideData?.pesticide;
+  const p = pesticideData?.pesticide || pesticideData;
 
   // Animations
   const headerAnim = useRef(new Animated.Value(0)).current;
