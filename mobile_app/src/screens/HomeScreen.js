@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     backgroundColor: 'rgba(18, 60, 18, 0.82)',
-    paddingTop: 60,
+    paddingTop: 40,
     paddingBottom: 32,
     paddingHorizontal: 24,
   },

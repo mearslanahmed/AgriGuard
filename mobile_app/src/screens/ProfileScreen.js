@@ -102,7 +102,7 @@ export default function ProfileScreen({ navigation }) {
       setStatsLoading(true);
       const [token, savedPic] = await Promise.all([
         SecureStore.getItemAsync("userToken"),
-        SecureStore.getItemAsync("profilePic"),
+        SecureStore.getItemAsync(`profilePic_${userInfo?.id}`),
       ]);
 
       if (savedPic) setProfilePic(savedPic);
@@ -169,7 +169,7 @@ export default function ProfileScreen({ navigation }) {
       });
 
       setProfilePic(permanentDirectory);
-      await SecureStore.setItemAsync("profilePic", permanentDirectory);
+      await SecureStore.setItemAsync(`profilePic_${userInfo?.id}`, permanentDirectory);
       showNotification("Profile picture updated successfully!");
     } catch (error) {
       console.log("Image process exception loop:", error);
@@ -224,7 +224,7 @@ export default function ProfileScreen({ navigation }) {
   const handleRemovePhoto = async () => {
     setPicOptionVisible(false);
     setProfilePic(null);
-    await SecureStore.deleteItemAsync("profilePic");
+    await SecureStore.deleteItemAsync(`profilePic_${userInfo?.id}`);
     showNotification("Profile picture removed.");
   };
 
@@ -400,7 +400,7 @@ export default function ProfileScreen({ navigation }) {
 
       {/* Configuration Navigation Group Blocks */}
       <Animated.View style={{ opacity: sectionsAnim }}>
-        <Text style={styles.sectionLabel}>PREFERENCES</Text>
+        {/* <Text style={styles.sectionLabel}>PREFERENCES</Text>
         <View style={styles.menuCard}>
           <MenuItem
             icon="notifications"
@@ -418,7 +418,7 @@ export default function ProfileScreen({ navigation }) {
               showNotification("Urdu support pack rolling out soon.")
             }
           />
-        </View>
+        </View> */}
 
         <Text style={styles.sectionLabel}>SUPPORT & UTILITIES</Text>
         <View style={styles.menuCard}>
@@ -452,7 +452,7 @@ export default function ProfileScreen({ navigation }) {
           <MenuItem
             icon="information-circle"
             label="App Version"
-            value="v1.0.0 (Beta)"
+            value="v1.0.0"
           />
         </View>
 
@@ -471,7 +471,7 @@ export default function ProfileScreen({ navigation }) {
         </TouchableOpacity>
 
         <Text style={styles.footer}>
-          AgriGuard Suite · Intelligent Crop Architecture 2026
+          AgriGuard · AG Leaders © 2026. All rights reserved.
         </Text>
       </Animated.View>
 
