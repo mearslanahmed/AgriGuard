@@ -1,19 +1,22 @@
-const nodemailer = require('nodemailer');
+const sendEmail = async ({ to, subject, html }) => {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': process.env.BREVO_API_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { email: process.env.VERIFIED_SENDER_EMAIL, name: 'AgriGuard Security' },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html
+    })
+  });
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASS?.replace(/\s/g, '').trim()
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Brevo dispatch failed: ${err}`);
   }
-});
+};
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Mail Carrier Relay Refused Handshake:', error.message);
-  } else {
-    console.log('AgriGuard Secure Mail Carrier Initialized and Active');
-  }
-});
-
-module.exports = transporter;
+module.exports = sendEmail;
