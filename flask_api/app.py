@@ -4,7 +4,6 @@ import numpy as np
 import io
 from flask import Flask, request, jsonify
 from PIL import Image
-# from huggingface_hub import hf_hub_download
 from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
@@ -15,21 +14,10 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 BASE = os.path.dirname(__file__)
 MODEL_DIR = os.path.join(BASE, 'model')
 
-# --- DEPLOYMENT CONFIGURATION ---
-# Set 'DEPLOY_ENV' to 'render' in your Render Environment Variables
-IS_RENDER = os.environ.get('DEPLOY_ENV') == 'render'
+model1_path = os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras')
+model2_path = os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras')
 
-# 1. DOWNLOAD OR LOCATE MODELS
-if IS_RENDER:
-    print("Fetching models from Hugging Face...")
-    model1_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model1_Final.keras")
-    model2_path = hf_hub_download(repo_id="mearslanahmed/AgriGuard-Models", filename="AgriGuard_Model2_Final.keras")
-else:
-    print("Loading models from local directory...")
-    model1_path = os.path.join(MODEL_DIR, 'AgriGuard_Model1_Final.keras')
-    model2_path = os.path.join(MODEL_DIR, 'AgriGuard_Model2_Final.keras')
-
-# 2. LOAD MODELS
+# LOAD MODELS
 print("Loading models into memory...")
 model1 = load_model(model1_path)
 model2 = load_model(model2_path)
