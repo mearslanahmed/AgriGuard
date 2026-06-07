@@ -4,7 +4,7 @@ const Pesticide = require('../models/Pesticide');
 // Called by mobile app after detection to get advisory for detected disease
 const getPesticideByClass = async (req, res) => {
   try {
-    const rawParam = decodeURIComponent(req.params.class_name).trim();
+    const rawParam = req.params.class_name.trim();
 
     // Escape regex structural characters like ( ) so they evaluate as literal text primitives
     const escapedParam = rawParam.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
