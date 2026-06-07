@@ -354,10 +354,11 @@ Built by [Arslan Ahmed](https://github.com/mearslanahmed) (lead developer) as pa
 
 ---
 
+AgriGuard was developed for **AG Leaders** - a smart agriculture initiative. A formal project letter is on file.
+
+---
+
 ## License
 
 MIT License. Developed as a Final Year Project at the Department of Software Engineering, Government College University Faisalabad.
 
----
-
-AgriGuard was developed for **AG Leaders** - a smart agriculture initiative. A formal project letter is on file.
