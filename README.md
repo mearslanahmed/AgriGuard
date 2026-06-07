@@ -10,7 +10,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Flask](https://img.shields.io/badge/Flask-HuggingFace-000000?logo=flask&logoColor=white)](https://mearslanahmed-agriguard-flask.hf.space)
 
-[Download APK](https://github.com/mearslanahmed/AgriGuard/releases/tag/v1.0.0) · [Backend API](https://agriguard-g3hq.onrender.com) · [ML API](https://mearslanahmed-agriguard-flask.hf.space)
+[Download APK](https://github.com/mearslanahmed/AgriGuard/releases/tag/v1.0.0) · [Backend API](https://agriguard-g3hq.onrender.com) · [ML API](https://mearslanahmed-agriguard-flask.hf.space) · [Website](https://mearslanahmed.github.io/AgriGuard/)
 
 </div>
 
