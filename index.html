@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriGuard - AI Crop Disease Detection & Smart Irrigation</title>
+  <meta name="description" content="An end-to-end smart farming system that detects crop diseases using deep learning and automates irrigation with IoT sensors.">
+  <meta name="author" content="Arslan Ahmed">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;750;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo">Agri<span>Guard</span></a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#screenshots">App</a></li>
+        <li><a href="#pipeline">ML Pipeline</a></li>
+        <li><a href="#stack">Stack</a></li>
+        <li><a href="https://github.com/mearslanahmed/AgriGuard/releases" class="nav-cta">Download APK</a></li>
+      </ul>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-label">
+          <span class="dot"></span>
+          Final Year Project - GCUF 2026
+        </div>
+        <h1>The AI brain for<br>modern <span class="accent">agriculture</span>.</h1>
+        <p>AgriGuard combines dual-stage deep learning with IoT soil sensors to give farmers instant disease diagnosis, treatment advice, and automated water management.</p>
+        <div class="hero-actions">
+          <a href="https://github.com/mearslanahmed/AgriGuard/releases" class="btn btn-primary">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download APK
+          </a>
+          <a href="https://github.com/mearslanahmed/AgriGuard" class="btn btn-ghost">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            View Source
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-metrics-bar">
+      <div class="container metrics-container">
+        <div class="metric">
+          <h3>10</h3>
+          <p>Supported crops</p>
+        </div>
+        <div class="metric">
+          <h3>76</h3>
+          <p>Disease conditions</p>
+        </div>
+        <div class="metric">
+          <h3>2&times;</h3>
+          <p>EfficientNetB3 models</p>
+        </div>
+        <div class="metric">
+          <h3>17</h3>
+          <p>REST API endpoints</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- â•â•â• FEATURES â•â•â• -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Capabilities</p>
+        <h2 class="section-title">What it does</h2>
+        <p class="section-desc">A single system covering the full workflow from disease identification to treatment and water management.</p>
+      </div>
+
+      <div class="features-grid stagger">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <h3>Disease Detection</h3>
+          <p>Two-stage classification pipeline identifies the crop species first, then diagnoses the specific disease from 76 possible conditions.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3>Treatment Advisory</h3>
+          <p>Returns pesticide name, dosage, spray interval, water dilution ratio, and safety notes from a database of 76+ verified records.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          </div>
+          <h3>Soil Moisture Monitoring</h3>
+          <p>Capacitive sensor on ESP32-WROOM reads analog moisture levels every 4 seconds, streamed to the mobile app via backend proxy.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24"><rect x="1" y="6" width="22" height="12" rx="2"/><line x1="7" y1="12" x2="7.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="17" y1="12" x2="17.01" y2="12"/></svg>
+          </div>
+          <h3>Pump Control</h3>
+          <p>Manual ON/OFF toggle or automatic mode that activates the pump below 30% moisture and deactivates above 70%. Failsafe defaults to OFF.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>OTP Authentication</h3>
+          <p>Email-based OTP for registration and password reset. Passwords hashed with bcrypt, sessions managed via JWT with 30-day expiry.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg class="icon-lg" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <h3>ESP32-CAM Capture</h3>
+          <p>Field-mounted camera module captures leaf images on demand. Backend resolves device IP dynamically and proxies the connection.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- â•â•â• ARCHITECTURE â•â•â• -->
+  <section id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">System Design</p>
+        <h2 class="section-title">Architecture</h2>
+        <p class="section-desc">Four decoupled tiers communicating over REST and HTTP, deployed across cloud and edge.</p>
+      </div>
+
+      <div class="arch-connectors reveal">
+        <span class="connector-node">Mobile App</span>
+        <span class="connector-arrow">&rarr;</span>
+        <span class="connector-node">Express API</span>
+        <span class="connector-arrow">&rarr;</span>
+        <span class="connector-node">MongoDB</span>
+        <span class="connector-arrow">&nbsp;&nbsp;&nbsp;</span>
+        <span class="connector-node">Mobile App</span>
+        <span class="connector-arrow">&rarr;</span>
+        <span class="connector-node">Flask ML</span>
+      </div>
+      <div class="arch-connectors reveal" style="margin-top: 0.5rem;">
+        <span class="connector-node">Express API</span>
+        <span class="connector-arrow">&harr;</span>
+        <span class="connector-node">ESP32 Hardware</span>
+        <span class="connector-arrow">&nbsp;&nbsp;&nbsp;</span>
+        <span class="connector-node">Express API</span>
+        <span class="connector-arrow">&rarr;</span>
+        <span class="connector-node">Brevo Email</span>
+      </div>
+
+      <div class="arch-tiers stagger" style="margin-top: 2rem;">
+        <div class="tier reveal">
+          <div class="tier-icon">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <h4>Mobile App</h4>
+          <p class="tech-name">React Native / Expo</p>
+          <p class="deploy-to">GitHub Releases (APK)</p>
+        </div>
+        <div class="tier reveal">
+          <div class="tier-icon">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h4>Backend API</h4>
+          <p class="tech-name">Node.js / Express</p>
+          <p class="deploy-to">Render</p>
+        </div>
+        <div class="tier reveal">
+          <div class="tier-icon">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <h4>ML Server</h4>
+          <p class="tech-name">Flask / TensorFlow</p>
+          <p class="deploy-to">Hugging Face Spaces</p>
+        </div>
+        <div class="tier reveal">
+          <div class="tier-icon">
+            <svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <h4>Database</h4>
+          <p class="tech-name">MongoDB Atlas</p>
+          <p class="deploy-to">5 collections</p>
+        </div>
+        <div class="tier reveal">
+          <div class="tier-icon">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M5.52 19c.64-2.2 1.84-3 3.22-3h6.52c1.38 0 2.58.8 3.22 3"/><circle cx="12" cy="10" r="3"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <h4>IoT Edge</h4>
+          <p class="tech-name">ESP32-CAM + WROOM</p>
+          <p class="deploy-to">Local network</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- â•â•â• SCREENSHOTS â•â•â• -->
+  <section id="screenshots">
+    <div class="container">
+      <div class="section-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem;">
+        <div>
+          <p class="section-label">Mobile App</p>
+          <h2 class="section-title">Interface</h2>
+          <p class="section-desc" style="margin-bottom: 0;">React Native app with tab navigation, secure storage, and real-time device communication.</p>
+        </div>
+        <div class="scroll-hint" style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-400); font-size: 0.85rem; font-weight: 500; animation: pulse 2s infinite;">
+          Scroll for more <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </div>
+      </div>
+
+      <div class="screenshots-track">
+        <figure class="screenshot"><img src="screenshots/Splash Screen.png" alt="Splash Screen" loading="lazy"><figcaption>Splash Screen</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Login Screen.png" alt="Login" loading="lazy"><figcaption>Login</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Registration Screen.png" alt="Register" loading="lazy"><figcaption>Register</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Home Screen (Dashboard).jpg" alt="Dashboard" loading="lazy"><figcaption>Main Dashboard</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Detect Screen (Empty).png" alt="Detect" loading="lazy"><figcaption>Camera View</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Detect Screen (Analyzing).png" alt="Analyzing" loading="lazy"><figcaption>AI Scanning</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Result Screen (Diseased).jpg" alt="Diseased" loading="lazy"><figcaption>Disease Result</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Result Screen (Healthy).png" alt="Healthy" loading="lazy"><figcaption>Healthy Result</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Water Management.png" alt="Irrigation" loading="lazy"><figcaption>Pump Control</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/History Screen.png" alt="History" loading="lazy"><figcaption>Scan History</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Supported Crops Catalog.png" alt="Catalog" loading="lazy"><figcaption>Crops Catalog</figcaption></figure>
+        <figure class="screenshot"><img src="screenshots/Profile Screen.png" alt="Profile" loading="lazy"><figcaption>User Profile</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- â•â•â• ML PIPELINE â•â•â• -->
+  <section id="pipeline">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Machine Learning</p>
+        <h2 class="section-title">Inference Pipeline</h2>
+        <p class="section-desc">Two EfficientNetB3 models execute sequentially with confidence thresholds and a dynamic fallback mechanism.</p>
+      </div>
+
+      <div class="pipeline-steps stagger">
+        <div class="step reveal">
+          <p class="step-num">Step 01</p>
+          <h4>Preprocess</h4>
+          <p>Image is resized to 300&times;300, converted to RGB, and pixel values normalized to 0&ndash;1 range.</p>
+          <div class="step-meta">PIL &rarr; RGB &rarr; 300px &rarr; /255</div>
+        </div>
+        <div class="step highlight reveal">
+          <p class="step-num">Step 02</p>
+          <h4>Crop Classification</h4>
+          <p>Model 1 identifies the crop species from 11 classes. Rejected if confidence is below 45% or classified as Unknown.</p>
+          <div class="step-meta">EfficientNetB3 &bull; 11 classes &bull; &ge;0.45</div>
+        </div>
+        <div class="step highlight reveal">
+          <p class="step-num">Step 03</p>
+          <h4>Disease Diagnosis</h4>
+          <p>Model 2 diagnoses the disease from 76 conditions, filtered by detected crop. Dynamic fallback evaluates runner-up crops for edge cases.</p>
+          <div class="step-meta">EfficientNetB3 &bull; 76 classes &bull; &ge;0.35</div>
+        </div>
+        <div class="step reveal">
+          <p class="step-num">Step 04</p>
+          <h4>Result &amp; Advisory</h4>
+          <p>Returns crop name, disease, confidence score, and health flag. Backend fetches matching pesticide advisory from MongoDB.</p>
+          <div class="step-meta">{crop, disease, confidence}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- â•â•â• TECH STACK â•â•â• -->
+  <section id="stack">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Technology</p>
+        <h2 class="section-title">Stack</h2>
+      </div>
+
+      <div class="stack-grid stagger">
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+          <div><h5>React Native</h5><span>Mobile app</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div><h5>Expo 54</h5><span>SDK &amp; tooling</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div><h5>Node.js</h5><span>Backend runtime</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+          <div><h5>Express.js</h5><span>REST API</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+          <div><h5>TensorFlow</h5><span>Deep learning</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/></svg></div>
+          <div><h5>Flask</h5><span>ML server</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
+          <div><h5>EfficientNetB3</h5><span>CNN model</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+          <div><h5>MongoDB</h5><span>Database</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+          <div><h5>ESP32</h5><span>IoT hardware</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div><h5>JWT + bcrypt</h5><span>Authentication</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
+          <div><h5>Render</h5><span>Backend hosting</span></div>
+        </div>
+        <div class="stack-item reveal">
+          <div class="stack-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg></div>
+          <div><h5>Hugging Face</h5><span>ML hosting</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- â•â•â• CTA â•â•â• -->
+  <div class="cta">
+    <div class="container">
+      <p class="section-label">Get Started</p>
+      <h2 class="section-title">Try AgriGuard</h2>
+      <p class="section-desc">Download the APK, photograph a leaf, get a diagnosis.</p>
+      <div class="cta-actions">
+        <a href="https://github.com/mearslanahmed/AgriGuard/releases" class="btn btn-primary">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download APK
+        </a>
+        <a href="https://github.com/mearslanahmed/AgriGuard" class="btn btn-ghost">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Star on GitHub
+        </a>
+        <a href="https://agriguard-g3hq.onrender.com" class="btn btn-ghost">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Live API
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- â•â•â• FOOTER â•â•â• -->
+  <footer>
+    <div class="container">
+      <p>Built by <a href="https://github.com/mearslanahmed">Arslan Ahmed</a> &middot; Dept. of Software Engineering, GCUF &middot; 2026</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
