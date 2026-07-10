@@ -233,3 +233,9 @@ flask_api/model/*.h5
 
 ml_model/*.keras
 ml_model/*.h5
+
+docs/AgriGuard_Documentation.docx
+docs/AgriGuard_Progress_Report_1.docx
+docs/AgriGuard_Progress_Report_2.docx
+docs/AgriGuard_Progress_Report_3.docx
+docs/AgriGuard_Progress_Report_4.docx
